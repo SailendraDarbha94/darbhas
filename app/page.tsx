@@ -54,7 +54,7 @@ const speakers = [
   },
   {
     name: "Dr. Usha Murali",
-    credentials: "Consultant in Dental Surgery",
+    credentials: "BDS, PGDHHM, PGDMLE, FAR(Sweden), MOT(ISTM)",
     position: "CGHS, MOHFW, GOI",
   },
 ];
