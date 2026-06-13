@@ -137,12 +137,16 @@ export default function Home() {
             JUSTICE • TRUST • ETHICS
           </div>
           <div className="flex justify-center mt-8">
-            <a
+            <p className="text-center text-sm sm:text-base lg:text-lg text-slate-200 max-w-3xl mx-auto italic">
+              Registrations are currently closed for the First Session. Second session is scheduled on 20th June and registrations will open on Monday, 15th June. <br /> For those who have registered please check your email for the invite link.
+            </p>
+            {/* <a
+              
               href="#registration-form"
               className="inline-block bg-white text-slate-900 font-semibold py-3 px-8 rounded-lg hover:bg-slate-100 transition duration-300 text-sm sm:text-base shadow-md hover:shadow-lg"
             >
               Register Now
-            </a>
+            </a> */}
           </div>
         </div>
       </header>
@@ -320,7 +324,7 @@ export default function Home() {
 
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={true}
                   className="w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2 text-sm sm:text-base min-h-12"
                 >
                   {isLoading ? (
