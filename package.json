@@ -1,0 +1,23 @@
+{
+  "name": "darbha",
+  "private": true,
+  "packageManager": "pnpm@10.34.4",
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:site": "turbo run dev --filter=@darbha/api --filter=@darbha/web",
+    "dev:mobile": "turbo run dev --filter=@darbha/mobile-plays",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "turbo run lint",
+    "db:generate": "pnpm --filter @darbha/db generate",
+    "db:migrate": "pnpm --filter @darbha/db migrate:deploy",
+    "db:seed": "pnpm --filter @darbha/db seed"
+  },
+  "devDependencies": {
+    "turbo": "^2.10.3",
+    "typescript": "^5.9.3"
+  }
+}

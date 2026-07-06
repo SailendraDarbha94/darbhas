@@ -1,0 +1,105 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum WorkType {
+  poem
+  play
+  travel
+  essay
+  other
+}
+
+enum TenantStatus {
+  active
+  hidden
+}
+
+enum ApplicationStatus {
+  pending
+  approved
+  rejected
+}
+
+enum ProfileRole {
+  admin
+  writer
+}
+
+model Tenant {
+  id          String       @id @default(uuid()) @db.Uuid
+  slug        String       @unique
+  displayName String       @map("display_name")
+  tagline     String?
+  genre       WorkType     @default(other)
+  bio         String?
+  /// TenantTheme JSON: { preset, accent?, fontStyle? }
+  theme       Json         @default("{\"preset\": \"ivory\"}")
+  avatarUrl   String?      @map("avatar_url")
+  status      TenantStatus @default(active)
+  ownerUserId String?      @unique @map("owner_user_id") @db.Uuid
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  works    Work[]
+  profiles Profile[]
+
+  @@map("tenants")
+}
+
+model Work {
+  id          String    @id @default(uuid()) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  type        WorkType  @default(other)
+  title       String
+  /// Markdown body
+  body        String    @default("")
+  excerpt     String?
+  coverUrl    String?   @map("cover_url")
+  /// WorkMedia JSON: { images?, audio?, video? }
+  media       Json      @default("{}")
+  tags        String[]  @default([])
+  published   Boolean   @default(false)
+  publishedAt DateTime? @map("published_at") @db.Timestamptz(6)
+  sortOrder   Int       @default(0) @map("sort_order")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, published, sortOrder])
+  @@map("works")
+}
+
+model Application {
+  id            String            @id @default(uuid()) @db.Uuid
+  firstName     String            @map("first_name")
+  lastName      String            @map("last_name")
+  requestedSlug String            @map("requested_slug")
+  email         String
+  message       String?
+  genre         WorkType          @default(other)
+  status        ApplicationStatus @default(pending)
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([status, createdAt])
+  @@map("applications")
+}
+
+/// Mirrors auth.users (Supabase); id is the Supabase auth user id.
+model Profile {
+  id        String      @id @db.Uuid
+  role      ProfileRole @default(writer)
+  tenantId  String?     @map("tenant_id") @db.Uuid
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@map("profiles")
+}
