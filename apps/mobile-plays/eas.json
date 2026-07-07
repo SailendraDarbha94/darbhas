@@ -11,14 +11,14 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://api.darbha.info/v1",
-        "EXPO_PUBLIC_TENANT_SLUG": "kameswara"
+        "EXPO_PUBLIC_TENANT_SLUG": "baburao"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_API_URL": "https://api.darbha.info/v1",
-        "EXPO_PUBLIC_TENANT_SLUG": "kameswara"
+        "EXPO_PUBLIC_TENANT_SLUG": "baburao"
       }
     }
   },

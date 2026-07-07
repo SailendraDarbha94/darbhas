@@ -11,6 +11,7 @@ datasource db {
 enum WorkType {
   poem
   play
+  talk
   travel
   essay
   other
@@ -41,6 +42,8 @@ model Tenant {
   bio         String?
   /// TenantTheme JSON: { preset, accent?, fontStyle? }
   theme       Json         @default("{\"preset\": \"ivory\"}")
+  /// TenantProfile JSON: { roles?, born?, parents?, education?, career? }
+  profile     Json?
   avatarUrl   String?      @map("avatar_url")
   status      TenantStatus @default(active)
   ownerUserId String?      @unique @map("owner_user_id") @db.Uuid
@@ -60,6 +63,8 @@ model Work {
   title       String
   /// Markdown body
   body        String    @default("")
+  /// BCP-47 language of the work ("en", "te", ...)
+  lang        String    @default("en")
   excerpt     String?
   coverUrl    String?   @map("cover_url")
   /// WorkMedia JSON: { images?, audio?, video? }

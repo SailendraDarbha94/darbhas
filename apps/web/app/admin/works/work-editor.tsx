@@ -46,6 +46,7 @@ export function WorkEditor({ work }: { work?: Work }) {
     const payload = {
       title: String(form.get("title")),
       type: String(form.get("type")) as WorkType,
+      lang: String(form.get("lang") || "en"),
       excerpt: String(form.get("excerpt") || "") || undefined,
       body: String(form.get("body") || ""),
       tags: String(form.get("tags") || "")
@@ -89,7 +90,7 @@ export function WorkEditor({ work }: { work?: Work }) {
         <input name="title" required maxLength={200} defaultValue={work?.title} className={inputCls} />
       </label>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-3">
         <label className="block">
           <span className="mb-1 block text-sm font-medium">Type</span>
           <select name="type" defaultValue={work?.type ?? "poem"} className={inputCls}>
@@ -98,6 +99,13 @@ export function WorkEditor({ work }: { work?: Work }) {
                 {GENRE_LABELS[t]}
               </option>
             ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">Language</span>
+          <select name="lang" defaultValue={work?.lang ?? "en"} className={inputCls}>
+            <option value="en">English</option>
+            <option value="te">తెలుగు (Telugu)</option>
           </select>
         </label>
         <label className="block">

@@ -48,6 +48,7 @@ export class WorksService {
         type: dto.type,
         title: dto.title,
         body: dto.body ?? "",
+        lang: dto.lang ?? "en",
         excerpt: dto.excerpt,
         coverUrl: dto.coverUrl,
         media: (dto.media ?? {}) as Prisma.InputJsonValue,

@@ -6,10 +6,12 @@ export interface TenantHeroProps {
   tenant: Pick<Tenant, "displayName" | "tagline" | "genre" | "bio" | "avatarUrl"> & {
     theme: TenantTheme;
   };
+  /** Overrides the genre label, e.g. "Educator • Scholar • Poet • Playwright". */
+  rolesLine?: string;
 }
 
 /** Header block for a person's subdomain site. */
-export function TenantHero({ tenant }: TenantHeroProps) {
+export function TenantHero({ tenant, rolesLine }: TenantHeroProps) {
   const palette = paletteFor(tenant.theme);
   const font = fontFamilyFor(tenant.theme);
 
@@ -64,7 +66,7 @@ export function TenantHero({ tenant }: TenantHeroProps) {
           fontWeight: 700,
         }}
       >
-        {GENRE_LABELS[tenant.genre]}
+        {rolesLine ?? GENRE_LABELS[tenant.genre]}
       </p>
       <h1 style={{ fontFamily: font, fontSize: "2.75rem", margin: "0 0 0.5rem", color: palette.text }}>
         {tenant.displayName}
@@ -86,6 +88,20 @@ export function TenantHero({ tenant }: TenantHeroProps) {
           {tenant.bio}
         </p>
       ) : null}
+
+      <div
+        aria-hidden
+        style={{
+          marginTop: "2.25rem",
+          color: palette.accent,
+          opacity: 0.55,
+          fontSize: "1.1rem",
+          letterSpacing: "0.75em",
+          paddingLeft: "0.75em",
+        }}
+      >
+        &#10086;&#xfe0e; &#10086;&#xfe0e; &#10086;&#xfe0e;
+      </div>
     </header>
   );
 }

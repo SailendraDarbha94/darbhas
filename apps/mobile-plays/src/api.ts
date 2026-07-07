@@ -4,7 +4,7 @@ import type { TenantWithWorks } from "@darbha/types";
 const extra = (Constants.expoConfig?.extra ?? {}) as { apiUrl?: string; tenantSlug?: string };
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? extra.apiUrl ?? "http://localhost:4400/v1";
-export const TENANT_SLUG = process.env.EXPO_PUBLIC_TENANT_SLUG ?? extra.tenantSlug ?? "kameswara";
+export const TENANT_SLUG = process.env.EXPO_PUBLIC_TENANT_SLUG ?? extra.tenantSlug ?? "baburao";
 
 export async function fetchTenant(): Promise<TenantWithWorks> {
   const res = await fetch(`${API_URL}/tenants/${TENANT_SLUG}`);

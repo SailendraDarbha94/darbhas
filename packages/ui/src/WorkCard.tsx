@@ -1,8 +1,9 @@
 import type { TenantTheme, Work } from "@darbha/types";
 import { fontFamilyFor, paletteFor } from "./palettes";
+import { formatDate } from "./date";
 
 export interface WorkCardProps {
-  work: Pick<Work, "title" | "excerpt" | "coverUrl" | "publishedAt" | "tags">;
+  work: Pick<Work, "title" | "excerpt" | "coverUrl" | "publishedAt" | "tags"> & { lang?: string };
   theme: TenantTheme;
   href: string;
 }
@@ -11,13 +12,7 @@ export interface WorkCardProps {
 export function WorkCard({ work, theme, href }: WorkCardProps) {
   const palette = paletteFor(theme);
   const font = fontFamilyFor(theme);
-  const date = work.publishedAt
-    ? new Date(work.publishedAt).toLocaleDateString("en-IN", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : null;
+  const date = work.publishedAt ? formatDate(work.publishedAt) : null;
 
   return (
     <a
@@ -48,9 +43,19 @@ export function WorkCard({ work, theme, href }: WorkCardProps) {
           }}
         />
       ) : null}
-      <h3 style={{ fontFamily: font, fontSize: "1.35rem", margin: "0 0 0.35rem" }}>{work.title}</h3>
+      <h3
+        lang={work.lang !== "en" ? work.lang : undefined}
+        style={{ fontFamily: font, fontSize: "1.35rem", margin: "0 0 0.35rem" }}
+      >
+        {work.title}
+      </h3>
       {work.excerpt ? (
-        <p style={{ margin: "0 0 0.75rem", lineHeight: 1.6, color: palette.muted }}>{work.excerpt}</p>
+        <p
+          lang={work.lang !== "en" ? work.lang : undefined}
+          style={{ margin: "0 0 0.75rem", lineHeight: 1.6, color: palette.muted }}
+        >
+          {work.excerpt}
+        </p>
       ) : null}
       <div style={{ display: "flex", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" }}>
         {date ? <span style={{ fontSize: "0.8rem", color: palette.muted }}>{date}</span> : null}

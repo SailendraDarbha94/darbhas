@@ -8,7 +8,13 @@ import {
   Matches,
   MaxLength,
 } from "class-validator";
-import { SLUG_REGEX, WORK_TYPES, type TenantTheme, type WorkType } from "@darbha/types";
+import {
+  SLUG_REGEX,
+  WORK_TYPES,
+  type TenantProfile,
+  type TenantTheme,
+  type WorkType,
+} from "@darbha/types";
 
 export class CreateTenantDto {
   @Matches(SLUG_REGEX, { message: "slug must be lowercase letters, digits and hyphens" })
@@ -33,6 +39,10 @@ export class CreateTenantDto {
   @IsOptional()
   @IsObject()
   theme?: TenantTheme;
+
+  @IsOptional()
+  @IsObject()
+  profile?: TenantProfile;
 
   @IsOptional()
   @IsString()
@@ -65,6 +75,10 @@ export class UpdateTenantDto {
   @IsOptional()
   @IsObject()
   theme?: TenantTheme;
+
+  @IsOptional()
+  @IsObject()
+  profile?: TenantProfile;
 
   @IsOptional()
   @IsString()

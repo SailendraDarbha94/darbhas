@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { createPrismaClient } from "../src";
+import { baburaoPoems, baburaoTalks } from "./baburao-content";
 
 const prisma = createPrismaClient();
 
@@ -30,16 +31,77 @@ async function main() {
     },
   });
 
+  // The placeholder grandfather tenant from the first seed, replaced by baburao.
+  await prisma.tenant.deleteMany({ where: { slug: "kameswara" } });
+
+  const baburaoProfile = {
+    roles: ["Educator", "Scholar", "Poet", "Playwright"],
+    born: { date: "9th February, 1946", place: "Bapatla, Andhra Pradesh" },
+    parents: {
+      father: "Late Sri Darbha Lakshmi Narayana Sastry",
+      mother: "Late Smt. Darbha Jwala Annapurna Visalakshi",
+    },
+    education: [
+      {
+        period: "Elementary",
+        title: "Mamillapalli Sitaramaiah Elementary School",
+        detail: "Bapatla, AP",
+      },
+      { period: "High School", title: "Board/Municipal High School", detail: "Bapatla, AP" },
+      {
+        period: "Pre-University (PUC)",
+        title: "VRS & YRN College of Arts and Science",
+        detail: "Chirala, AP",
+      },
+      { period: "Graduation (B.Com)", title: "C S R Sarma College", detail: "Ongole, AP" },
+      {
+        period: "Post-Graduation (M.Com)",
+        title: "Andhra University",
+        detail: "Visakhapatnam, AP",
+      },
+    ],
+    career: [
+      {
+        period: "1998 – 2004",
+        title: "Head of Department of Commerce",
+        detail: "The Bapatla College of Arts & Sciences, Bapatla (AP)",
+      },
+      {
+        period: "Retired 2004",
+        title: "Vice-Principal",
+        detail: "The Bapatla College of Arts & Sciences, Bapatla (AP)",
+      },
+    ],
+  };
+
   const grandfather = await prisma.tenant.upsert({
-    where: { slug: "kameswara" },
-    update: {},
+    where: { slug: "baburao" },
+    update: { profile: baburaoProfile },
     create: {
-      slug: "kameswara",
-      displayName: "Kameswara Darbha",
-      tagline: "Plays for the family stage",
-      genre: "play",
-      bio: "A lifetime of plays, written between careers and continents.",
+      slug: "baburao",
+      displayName: "Darbha Babu Rao",
+      tagline: "Poems and plays, in Telugu",
+      genre: "poem",
+      bio: "Educator and scholar from Bapatla who spent a lifetime teaching commerce — and writing Telugu poetry and plays for the family stage.",
       theme: { preset: "ink", fontStyle: "serif" },
+      profile: baburaoProfile,
+    },
+  });
+
+  // Idempotency: remove previously-seeded works (matched by title) before re-inserting.
+  const seededTitles = [
+    "Three Days in Hampi",
+    "Monsoon Arithmetic",
+    "The Clerk of Rajahmundry",
+    ...baburaoPoems.map((w) => w.title),
+    ...baburaoTalks.map((w) => w.title),
+    // Legacy placeholder — removed once full text is available in poetry.ts
+    "నేనూ ఒక కవినేనా",
+  ];
+  await prisma.work.deleteMany({
+    where: {
+      tenantId: { in: [phanindra.id, sailendra.id, grandfather.id] },
+      title: { in: seededTitles },
     },
   });
 
@@ -67,22 +129,35 @@ async function main() {
         publishedAt: new Date(),
         sortOrder: 1,
       },
-      {
+      // Babu Rao — Telugu poems and talks (from darbha-baburao-web-dashboard)
+      ...baburaoPoems.map((work) => ({
         tenantId: grandfather.id,
-        type: "play",
-        title: "The Clerk of Rajahmundry",
-        excerpt: "A two-act play about a clerk who refuses a bribe and pays for it.",
-        body: "## Act I, Scene 1\n\n*A government office. Ceiling fans turn slowly.*",
-        tags: ["two-act", "telugu"],
+        type: "poem" as const,
+        lang: "te",
+        title: work.title,
+        excerpt: work.excerpt,
+        body: work.body,
         published: true,
         publishedAt: new Date(),
-        sortOrder: 1,
-      },
+        sortOrder: work.sortOrder,
+      })),
+      ...baburaoTalks.map((work) => ({
+        tenantId: grandfather.id,
+        type: "talk" as const,
+        lang: "te",
+        title: work.title,
+        excerpt: work.excerpt,
+        body: work.body,
+        published: true,
+        publishedAt: new Date(),
+        sortOrder: work.sortOrder,
+      })),
     ],
     skipDuplicates: true,
   });
 
   console.log("Seeded tenants:", phanindra.slug, sailendra.slug, grandfather.slug);
+  console.log("Grandfather works:", await prisma.work.count({ where: { tenantId: grandfather.id } }));
 }
 
 main()

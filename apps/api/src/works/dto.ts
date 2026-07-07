@@ -9,7 +9,7 @@ import {
   IsUUID,
   MaxLength,
 } from "class-validator";
-import { WORK_TYPES, type WorkMedia, type WorkType } from "@darbha/types";
+import { WORK_LANGS, WORK_TYPES, type WorkMedia, type WorkType } from "@darbha/types";
 
 export class CreateWorkDto {
   /** Admins must specify which tenant; writers default to their own. */
@@ -27,6 +27,10 @@ export class CreateWorkDto {
   @IsOptional()
   @IsString()
   body?: string;
+
+  @IsOptional()
+  @IsIn(WORK_LANGS)
+  lang?: string;
 
   @IsOptional()
   @IsString()
@@ -68,6 +72,10 @@ export class UpdateWorkDto {
   @IsOptional()
   @IsString()
   body?: string;
+
+  @IsOptional()
+  @IsIn(WORK_LANGS)
+  lang?: string;
 
   @IsOptional()
   @IsString()

@@ -1,4 +1,7 @@
-export type WorkType = "poem" | "play" | "travel" | "essay" | "other";
+export type WorkType = "poem" | "play" | "talk" | "travel" | "essay" | "other";
+
+/** BCP-47 language tags the platform styles for. */
+export type WorkLang = "en" | "te";
 
 export type TenantStatus = "active" | "hidden";
 
@@ -16,6 +19,23 @@ export interface TenantTheme {
   fontStyle?: "serif" | "sans";
 }
 
+/** A dated (or period) entry in a life timeline: education, career, etc. */
+export interface TimelineEntry {
+  period: string;
+  title: string;
+  detail?: string;
+}
+
+/** Optional structured biography rendered as a "Life" section on the subdomain. */
+export interface TenantProfile {
+  /** e.g. ["Educator", "Scholar", "Poet", "Playwright"] */
+  roles?: string[];
+  born?: { date?: string; place?: string };
+  parents?: { father?: string; mother?: string };
+  education?: TimelineEntry[];
+  career?: TimelineEntry[];
+}
+
 export interface Tenant {
   id: string;
   slug: string;
@@ -24,6 +44,7 @@ export interface Tenant {
   genre: WorkType;
   bio: string | null;
   theme: TenantTheme;
+  profile: TenantProfile | null;
   avatarUrl: string | null;
   status: TenantStatus;
   ownerUserId: string | null;
@@ -44,6 +65,8 @@ export interface Work {
   title: string;
   /** Markdown body. */
   body: string;
+  /** Language of the work ("en", "te", ...). */
+  lang: string;
   excerpt: string | null;
   coverUrl: string | null;
   media: WorkMedia;
@@ -88,7 +111,9 @@ export interface CreateApplicationInput {
   genre: WorkType;
 }
 
-export const WORK_TYPES: WorkType[] = ["poem", "play", "travel", "essay", "other"];
+export const WORK_TYPES: WorkType[] = ["poem", "play", "talk", "travel", "essay", "other"];
+
+export const WORK_LANGS: WorkLang[] = ["en", "te"];
 
 export const THEME_PRESETS: TenantTheme["preset"][] = ["ivory", "ink", "sage", "sand", "plum"];
 

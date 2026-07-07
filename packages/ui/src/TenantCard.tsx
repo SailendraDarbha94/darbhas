@@ -19,10 +19,13 @@ export function TenantCard({ tenant, href }: TenantCardProps) {
     <a
       href={href}
       style={{
+        position: "relative",
+        overflow: "hidden",
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        minHeight: 220,
+        gap: "1rem",
+        minHeight: 230,
         padding: "1.75rem",
         borderRadius: 20,
         textDecoration: "none",
@@ -34,6 +37,23 @@ export function TenantCard({ tenant, href }: TenantCardProps) {
       }}
       className="darbha-card"
     >
+      <span
+        aria-hidden
+        style={{
+          position: "absolute",
+          right: "-0.15em",
+          bottom: "-0.35em",
+          fontSize: "7.5rem",
+          lineHeight: 1,
+          color: palette.accent,
+          opacity: 0.1,
+          fontFamily: font,
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+      >
+        {GENRE_GLYPHS[tenant.genre]}
+      </span>
       <div style={{ display: "flex", alignItems: "center", gap: "0.9rem" }}>
         {tenant.avatarUrl ? (
           <img

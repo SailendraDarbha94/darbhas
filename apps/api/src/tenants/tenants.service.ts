@@ -54,6 +54,7 @@ export class TenantsService {
         genre: dto.genre,
         bio: dto.bio,
         theme: (dto.theme ?? { preset: "ivory" }) as Prisma.InputJsonValue,
+        profile: dto.profile as Prisma.InputJsonValue | undefined,
         avatarUrl: dto.avatarUrl,
         ownerUserId: dto.ownerUserId,
       },
@@ -73,7 +74,11 @@ export class TenantsService {
 
     return this.prisma.client.tenant.update({
       where: { id },
-      data: { ...data, theme: data.theme as Prisma.InputJsonValue | undefined },
+      data: {
+        ...data,
+        theme: data.theme as Prisma.InputJsonValue | undefined,
+        profile: data.profile as Prisma.InputJsonValue | undefined,
+      },
     });
   }
 

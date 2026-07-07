@@ -1,21 +1,30 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  FlatList,
   Pressable,
   RefreshControl,
   SafeAreaView,
   ScrollView,
+  SectionList,
   StatusBar as RNStatusBar,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import type { TenantWithWorks, Work } from "@darbha/types";
+import type { TenantWithWorks, Work, WorkType } from "@darbha/types";
 import { fetchTenant } from "./src/api";
 import { Markdown } from "./src/Markdown";
 import { theme } from "./src/theme";
+
+const SECTION_TITLES: Partial<Record<WorkType, string>> = {
+  poem: "కవితలు · Poems",
+  talk: "ప్రసంగాలు · Talks",
+  play: "నాటకాలు · Plays",
+  travel: "Travel",
+  essay: "Essays",
+  other: "Writing",
+};
 
 export default function App() {
   const [tenant, setTenant] = useState<TenantWithWorks | null>(null);
@@ -95,23 +104,35 @@ function PlayList({
     );
   }
 
+  const order: WorkType[] = ["poem", "talk", "play", "travel", "essay", "other"];
+  const sections = order
+    .map((type) => ({
+      title: SECTION_TITLES[type] ?? type,
+      data: tenant.works.filter((w) => w.type === type),
+    }))
+    .filter((s) => s.data.length > 0);
+
   return (
-    <FlatList
-      data={tenant.works}
+    <SectionList
+      sections={sections}
       keyExtractor={(item) => item.id}
+      stickySectionHeadersEnabled={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.accent} />
       }
       contentContainerStyle={styles.listContent}
       ListHeaderComponent={
         <View style={styles.header}>
-          <Text style={styles.kicker}>PLAYS BY</Text>
+          <Text style={styles.kicker}>THE WRITING OF</Text>
           <Text style={styles.title}>{tenant.displayName}</Text>
           {tenant.tagline ? <Text style={styles.tagline}>{tenant.tagline}</Text> : null}
         </View>
       }
       ListEmptyComponent={
-        <Text style={styles.emptyText}>No plays published yet — pull to refresh.</Text>
+        <Text style={styles.emptyText}>Nothing published yet — pull to refresh.</Text>
+      }
+      renderSectionHeader={({ section }) =>
+        sections.length > 1 ? <Text style={styles.sectionTitle}>{section.title}</Text> : null
       }
       renderItem={({ item }) => (
         <Pressable onPress={() => onOpen(item)} style={styles.card}>
@@ -155,6 +176,14 @@ const styles = StyleSheet.create({
   },
   retryLabel: { color: theme.bg, fontWeight: "700" },
   listContent: { padding: 20, gap: 14 },
+  sectionTitle: {
+    color: theme.accent,
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 1.5,
+    marginTop: 10,
+    marginBottom: 2,
+  },
   header: { paddingVertical: 24, alignItems: "center" },
   kicker: { color: theme.accent, letterSpacing: 3, fontSize: 12, fontWeight: "700" },
   title: { color: theme.text, fontSize: 32, fontWeight: "700", marginTop: 8 },

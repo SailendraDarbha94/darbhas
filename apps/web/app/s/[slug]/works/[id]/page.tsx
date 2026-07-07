@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import type { TenantTheme } from "@darbha/types";
-import { fontFamilyFor, paletteFor } from "@darbha/ui";
+import { fontFamilyFor, formatDate, paletteFor } from "@darbha/ui";
 import { ApiError, getTenantBySlug } from "@/lib/api";
 
 interface Props {
@@ -40,13 +40,7 @@ export default async function WorkPage(props: Props) {
   const palette = paletteFor(theme);
   const font = fontFamilyFor(theme);
 
-  const date = work.publishedAt
-    ? new Date(work.publishedAt).toLocaleDateString("en-IN", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : null;
+  const date = work.publishedAt ? formatDate(work.publishedAt) : null;
 
   return (
     <main style={{ minHeight: "100vh", background: palette.bg, color: palette.text }}>
@@ -55,12 +49,27 @@ export default async function WorkPage(props: Props) {
           &larr; {tenant.displayName}
         </a>
 
-        <h1 style={{ fontFamily: font, fontSize: "2.5rem", margin: "1.5rem 0 0.5rem" }}>
+        <h1
+          lang={work.lang !== "en" ? work.lang : undefined}
+          style={{ fontFamily: font, fontSize: "2.5rem", margin: "1.5rem 0 0.5rem" }}
+        >
           {work.title}
         </h1>
         {date ? (
-          <p style={{ color: palette.muted, fontSize: "0.9rem", margin: "0 0 2.5rem" }}>{date}</p>
+          <p style={{ color: palette.muted, fontSize: "0.9rem", margin: 0 }}>{date}</p>
         ) : null}
+
+        <div
+          aria-hidden
+          style={{
+            margin: "1.75rem 0 2.25rem",
+            color: palette.accent,
+            opacity: 0.5,
+            letterSpacing: "0.6em",
+          }}
+        >
+          &#10086;&#xfe0e;
+        </div>
 
         {work.coverUrl ? (
           <img
@@ -72,6 +81,7 @@ export default async function WorkPage(props: Props) {
 
         <div
           className="work-body"
+          lang={work.lang !== "en" ? work.lang : undefined}
           style={{ fontFamily: font, fontSize: "1.1rem", lineHeight: 1.85 }}
         >
           <ReactMarkdown>{work.body}</ReactMarkdown>
