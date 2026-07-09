@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
+    "scheme": "darbha-plays",
     "newArchEnabled": true,
     "backgroundColor": "#12141c",
     "ios": {
@@ -14,6 +15,10 @@
     "android": {
       "package": "info.darbha.plays",
       "edgeToEdgeEnabled": true
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
     },
     "extra": {
       "apiUrl": "http://localhost:4400/v1",
