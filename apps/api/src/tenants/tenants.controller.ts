@@ -32,7 +32,7 @@ export class TenantsController {
     return this.tenants.listAll();
   }
 
-  /** Public: a tenant and its published works (used by subdomains + mobile). */
+  /** Public: a tenant and its published works (used by subdomains). */
   @Get(":slug")
   bySlug(@Param("slug") slug: string) {
     return this.tenants.getBySlugWithWorks(slug);

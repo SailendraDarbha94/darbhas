@@ -1,8 +1,7 @@
 # darbha.info — a family of writers
 
 A multi-tenant platform for the Darbha family. The apex site shows a gallery of every hosted
-Darbha with an application form; each writer gets their own themed subdomain; a companion
-Expo app showcases the plays.
+Darbha with an application form; each writer gets their own themed subdomain.
 
 | Surface | Where | What |
 | --- | --- | --- |
@@ -10,7 +9,6 @@ Expo app showcases the plays.
 | `{name}.darbha.info` | same Next.js app | Per-person site (wildcard routing via `proxy.ts`) |
 | `admin.darbha.info` (or `/admin`) | same Next.js app | Writer/admin dashboard (Supabase auth) |
 | `api.darbha.info` | Render/Railway (`apps/api`) | NestJS REST API on Supabase Postgres |
-| Darbha Plays | Expo (`apps/mobile-plays`) | Grandfather's plays, reading the same API |
 
 ## Layout
 
@@ -18,7 +16,6 @@ Expo app showcases the plays.
 apps/
   web/           Next.js 16 (App Router, Tailwind v4) — apex, subdomains, admin
   api/           NestJS 11 — tenants, works, applications + Supabase JWT auth
-  mobile-plays/  Expo SDK 57 — showcases one tenant's plays
 packages/
   types/         Shared TypeScript domain types
   ui/            Themeable React components (cards, hero, palettes)
@@ -70,8 +67,7 @@ To let a writer manage a site, link their profile: `update public.profiles set t
 
 ```bash
 pnpm dev:site     # NestJS api (4400) + Next.js web (3400) only
-pnpm dev          # everything, including the Expo dev server
-pnpm dev:mobile   # Expo only (needs the API running)
+pnpm dev          # everything
 ```
 
 - Apex: http://localhost:3400
@@ -113,22 +109,12 @@ Point `api.darbha.info` at the service.
   Vercel issues the wildcard certificate automatically (domain must use Vercel nameservers
   or the CNAME method).
 
-### 4. Mobile -> EAS
-
-```bash
-cd apps/mobile-plays
-npx eas-cli build --profile preview --platform ios   # internal/TestFlight build
-```
-
-`eas.json` bakes the production API URL into preview/production builds; during development
-Expo Go + `EXPO_PUBLIC_API_URL` is all you need.
-
 ## API surface (prefix `/v1`)
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
 | GET | `/tenants` | public | Active tenants (gallery cards) |
-| GET | `/tenants/:slug` | public | Tenant + published works (subdomains, mobile) |
+| GET | `/tenants/:slug` | public | Tenant + published works (subdomains) |
 | GET | `/tenants/all` | admin | Every tenant incl. hidden |
 | POST/PATCH/DELETE | `/tenants` | admin (writers may PATCH their own) | Manage sites |
 | GET/POST/PATCH/DELETE | `/works` | writer/admin | CRUD works (writers scoped to their tenant) |

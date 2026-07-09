@@ -97,7 +97,7 @@ export interface Profile {
   createdAt: string;
 }
 
-/** Tenant plus its published works, as served to subdomain pages and the mobile app. */
+/** Tenant plus its published works, as served to subdomain pages. */
 export interface TenantWithWorks extends Tenant {
   works: Work[];
 }

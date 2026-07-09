@@ -8,14 +8,11 @@ out/
 build/
 .turbo/
 
-# expo
-.expo/
-expo-env.d.ts
+# keys & certificates
 *.jks
 *.p8
 *.p12
 *.key
-*.mobileprovision
 
 # env
 .env

@@ -8,7 +8,6 @@
   "scripts": {
     "dev": "turbo run dev",
     "dev:site": "turbo run dev --filter=@darbha/api --filter=@darbha/web",
-    "dev:mobile": "turbo run dev --filter=@darbha/mobile-plays",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
