@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+
+# expo
+.expo/
+dist/
+expo-env.d.ts
+web-build/
+
+# native builds
+ios/
+android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# env
+.env
+.env.*
+!.env.example
+
+# misc
+.DS_Store
+*.log
+*.tsbuildinfo

@@ -8,6 +8,10 @@ out/
 build/
 .turbo/
 
+# expo (apps/mobile/*)
+.expo/
+expo-env.d.ts
+
 # keys & certificates
 *.jks
 *.p8

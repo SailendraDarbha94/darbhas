@@ -18,10 +18,13 @@ const telugu = Noto_Serif_Telugu({
   variable: "--font-telugu",
 });
 
+const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "darbha.info";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(`https://${SITE_DOMAIN}`),
   title: {
-    default: "Darbha — a family of writers",
-    template: "%s · darbha.info",
+    default: "Darbha — a legacy of writers, travellers & narrators",
+    template: `%s · ${SITE_DOMAIN}`,
   },
   description:
     "The Darbha family writes: poetry, plays, travel essays. One surname, many voices, each with their own corner of the internet.",

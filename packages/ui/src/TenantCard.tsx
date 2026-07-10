@@ -10,14 +10,20 @@ export interface TenantCardProps {
   href: string;
 }
 
-/** A "cool looking card" for the apex gallery, themed per tenant. */
+/** A frosted liquid-glass card for the apex gallery, tinted with the tenant's palette. */
 export function TenantCard({ tenant, href }: TenantCardProps) {
   const palette = paletteFor(tenant.theme);
   const font = fontFamilyFor(tenant.theme);
+  const g = palette.glass;
+
+  // Colored glass: a translucent wash of the tenant's own gradient (so each
+  // person stays visually distinct) layered under the frosted-glass material.
+  const [g0, g1] = palette.gradient;
 
   return (
     <a
       href={href}
+      className="darbha-card"
       style={{
         position: "relative",
         overflow: "hidden",
@@ -25,18 +31,31 @@ export function TenantCard({ tenant, href }: TenantCardProps) {
         flexDirection: "column",
         justifyContent: "space-between",
         gap: "1rem",
-        minHeight: 230,
+        minHeight: 232,
         padding: "1.75rem",
-        borderRadius: 20,
+        borderRadius: 24,
         textDecoration: "none",
         color: palette.text,
-        background: `linear-gradient(135deg, ${palette.gradient[0]}, ${palette.gradient[1]})`,
-        border: `1px solid ${palette.accent}22`,
-        boxShadow: "0 1px 2px rgba(0,0,0,0.06), 0 12px 32px -16px rgba(0,0,0,0.25)",
-        transition: "transform 150ms ease, box-shadow 150ms ease",
+        background: `linear-gradient(150deg, ${g0}e0, ${g1}cc)`,
+        border: `1px solid ${g.border}`,
+        backdropFilter: `blur(${g.blur}px) saturate(180%)`,
+        WebkitBackdropFilter: `blur(${g.blur}px) saturate(180%)`,
+        boxShadow: g.shadow,
+        transition: "transform 200ms ease, box-shadow 200ms ease",
       }}
-      className="darbha-card"
     >
+      {/* Specular top highlight */}
+      <span
+        aria-hidden
+        style={{
+          position: "absolute",
+          insetInline: 0,
+          top: 0,
+          height: 1,
+          background: `linear-gradient(90deg, transparent, ${g.highlight}, transparent)`,
+        }}
+      />
+      {/* Oversized genre glyph watermark */}
       <span
         aria-hidden
         style={{
@@ -46,7 +65,7 @@ export function TenantCard({ tenant, href }: TenantCardProps) {
           fontSize: "7.5rem",
           lineHeight: 1,
           color: palette.accent,
-          opacity: 0.1,
+          opacity: palette.dark ? 0.14 : 0.1,
           fontFamily: font,
           pointerEvents: "none",
           userSelect: "none",
@@ -54,6 +73,7 @@ export function TenantCard({ tenant, href }: TenantCardProps) {
       >
         {GENRE_GLYPHS[tenant.genre]}
       </span>
+
       <div style={{ display: "flex", alignItems: "center", gap: "0.9rem" }}>
         {tenant.avatarUrl ? (
           <img
@@ -61,7 +81,11 @@ export function TenantCard({ tenant, href }: TenantCardProps) {
             alt=""
             width={52}
             height={52}
-            style={{ borderRadius: "50%", objectFit: "cover" }}
+            style={{
+              borderRadius: "50%",
+              objectFit: "cover",
+              border: `1px solid ${g.border}`,
+            }}
           />
         ) : (
           <span
@@ -73,7 +97,8 @@ export function TenantCard({ tenant, href }: TenantCardProps) {
               width: 52,
               height: 52,
               borderRadius: "50%",
-              background: palette.surface,
+              background: g.surfaceStrong,
+              border: `1px solid ${g.border}`,
               color: palette.accent,
               fontSize: "1.5rem",
             }}

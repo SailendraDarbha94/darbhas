@@ -1,0 +1,20 @@
+import * as Haptics from 'expo-haptics';
+// SDK 56+: expo-router vendors react-navigation — import from its surfaces,
+// never from @react-navigation/* (Metro hard-errors on those imports).
+import type { BottomTabBarButtonProps } from 'expo-router/build/react-navigation/bottom-tabs';
+import { PlatformPressable } from 'expo-router/react-navigation';
+
+export function HapticTab(props: BottomTabBarButtonProps) {
+  return (
+    <PlatformPressable
+      {...props}
+      onPressIn={(ev) => {
+        if (process.env.EXPO_OS === 'ios') {
+          // Add a soft haptic feedback when pressing down on the tabs.
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+        props.onPressIn?.(ev);
+      }}
+    />
+  );
+}

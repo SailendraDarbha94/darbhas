@@ -11,10 +11,116 @@ body {
 }
 
 .darbha-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.06),
-    0 20px 40px -16px rgba(0, 0, 0, 0.3) !important;
+    0 2px 6px rgba(70, 45, 25, 0.08),
+    0 32px 60px -28px rgba(70, 45, 25, 0.55) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .darbha-card {
+    transition: none !important;
+  }
+  .darbha-card:hover {
+    transform: none;
+  }
+}
+
+/* ---- Liquid glass: apex + forms (warm, light theme) ---- */
+
+.apex-ground {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 48% at 8% 4%, #fdeeda 0%, transparent 56%),
+    radial-gradient(52% 44% at 96% 0%, rgba(240, 205, 163, 0.7) 0%, transparent 52%),
+    radial-gradient(64% 58% at 94% 100%, rgba(224, 176, 133, 0.42) 0%, transparent 56%),
+    radial-gradient(48% 46% at 24% 96%, rgba(176, 113, 59, 0.16) 0%, transparent 56%),
+    linear-gradient(160deg, #fcf6ec 0%, #f6e6d0 55%, #f0dabf 100%);
+}
+
+.glass-panel {
+  position: relative;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  box-shadow:
+    0 1px 2px rgba(70, 45, 25, 0.06),
+    0 26px 54px -26px rgba(70, 45, 25, 0.5);
+}
+
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+}
+
+.glass-input {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(176, 113, 59, 0.22);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 0.65rem 1rem;
+  color: #2b2620;
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+.glass-input::placeholder {
+  color: #a99277;
+}
+
+.glass-input:focus {
+  border-color: rgba(176, 113, 59, 0.7);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 0 0 3px rgba(176, 113, 59, 0.16);
+}
+
+.glass-btn {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(180deg, #bd7d42, #a5612f);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.8rem 1.25rem;
+  box-shadow:
+    0 10px 22px -10px rgba(165, 97, 47, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    filter 150ms ease;
+}
+
+.glass-btn:hover:not(:disabled) {
+  filter: brightness(1.05);
+  box-shadow:
+    0 14px 28px -10px rgba(165, 97, 47, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.glass-btn:disabled {
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-btn,
+  .glass-input {
+    transition: none;
+  }
 }
 
 /* Markdown body on work detail pages (server-rendered, palette-agnostic). */

@@ -2,13 +2,29 @@ import type { Metadata } from "next";
 import type { TenantTheme } from "@darbha/types";
 import { TenantCard } from "@darbha/ui";
 import { getTenants } from "@/lib/api";
+import { SITE_DOMAIN, apexUrl } from "@/lib/tenant-host";
 import { ApplyForm } from "./apply-form";
 
+const TITLE = "Darbha — a legacy of writers, travellers & narrators";
+const DESCRIPTION =
+  "The Darbha family writes: poetry, plays, travel essays. One surname, many voices, each with their own corner of the internet.";
+
 export const metadata: Metadata = {
-  title: "Darbha — a family of writers",
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: apexUrl() },
+  openGraph: {
+    type: "website",
+    url: apexUrl(),
+    siteName: "Darbha",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION },
 };
 
-const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "darbha.info";
+/** The grandfather's memorial site leads the gallery. */
+const FEATURED_SLUG = "baburao";
 
 export default async function ApexPage() {
   let tenants: Awaited<ReturnType<typeof getTenants>> = [];
@@ -19,8 +35,16 @@ export default async function ApexPage() {
     apiDown = true;
   }
 
+  // Feature Darbha Babu Rao first, then the rest in their existing order.
+  const ordered = [
+    ...tenants.filter((t) => t.slug === FEATURED_SLUG),
+    ...tenants.filter((t) => t.slug !== FEATURED_SLUG),
+  ];
+
   return (
-    <main className="min-h-screen bg-[#faf7f0] text-[#2b2620]">
+    <main className="relative min-h-screen text-[#2b2620]">
+      <div aria-hidden className="apex-ground" />
+
       <section className="mx-auto max-w-5xl px-6 pt-24 pb-14 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#b0713b]">
           One surname &middot; many voices
@@ -32,8 +56,8 @@ export default async function ApexPage() {
           &#10086;&#xfe0e;
         </div>
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-[#7d7468]">
-          A family of writers. Poetry, plays, and travel essays — each Darbha with their own corner
-          of the internet, under one roof.
+          A legacy of writers, travellers &amp; narrators. Poetry, plays, and travel essays — each
+          Darbha with their own corner of the internet, under one roof.
         </p>
       </section>
 
@@ -45,16 +69,16 @@ export default async function ApexPage() {
           <div className="h-px flex-1 bg-gradient-to-r from-[#b0713b]/30 to-transparent" />
         </div>
         {apiDown ? (
-          <p className="rounded-xl border border-dashed border-[#b0713b]/40 p-8 text-center text-[#7d7468]">
+          <div className="glass-panel p-8 text-center text-[#7d7468]">
             The gallery is waking up — check back in a moment.
-          </p>
-        ) : tenants.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-[#b0713b]/40 p-8 text-center text-[#7d7468]">
+          </div>
+        ) : ordered.length === 0 ? (
+          <div className="glass-panel p-8 text-center text-[#7d7468]">
             No writers hosted yet. Be the first — apply below.
-          </p>
+          </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {tenants.map((tenant) => (
+            {ordered.map((tenant) => (
               <TenantCard
                 key={tenant.id}
                 tenant={{ ...tenant, theme: tenant.theme as TenantTheme }}
@@ -65,8 +89,8 @@ export default async function ApexPage() {
         )}
       </section>
 
-      <section id="apply" className="border-t border-[#b0713b]/15 bg-white/60">
-        <div className="mx-auto max-w-xl px-6 py-16">
+      <section id="apply" className="mx-auto max-w-xl px-6 pb-24">
+        <div className="glass-panel p-8 sm:p-10">
           <h2 className="font-[family-name:var(--font-serif)] text-3xl font-medium">
             Are you a Darbha?
           </h2>

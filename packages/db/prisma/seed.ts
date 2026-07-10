@@ -5,30 +5,30 @@ import { baburaoPoems, baburaoTalks } from "./baburao-content";
 const prisma = createPrismaClient();
 
 async function main() {
+  const phanindraData = {
+    displayName: "Sai Phanindra Darbha",
+    tagline: "Poems, mostly at night",
+    genre: "poem" as const,
+    bio: "Poetry on memory, monsoons, and everything in between.",
+    theme: { preset: "plum", fontStyle: "serif" },
+  };
   const phanindra = await prisma.tenant.upsert({
     where: { slug: "phanindra" },
-    update: {},
-    create: {
-      slug: "phanindra",
-      displayName: "Phanindra Darbha",
-      tagline: "Notes from the road",
-      genre: "travel",
-      bio: "I write about the places I wander through and the people I meet along the way.",
-      theme: { preset: "sand", fontStyle: "sans" },
-    },
+    update: phanindraData,
+    create: { slug: "phanindra", ...phanindraData },
   });
 
+  const sailendraData = {
+    displayName: "Sailendra Darbha",
+    tagline: "Notes from the road",
+    genre: "travel" as const,
+    bio: "I write about the places I wander through and the people I meet along the way.",
+    theme: { preset: "sand", fontStyle: "sans" },
+  };
   const sailendra = await prisma.tenant.upsert({
     where: { slug: "sailendra" },
-    update: {},
-    create: {
-      slug: "sailendra",
-      displayName: "Sailendra Darbha",
-      tagline: "Poems, mostly at night",
-      genre: "poem",
-      bio: "Poetry on memory, monsoons, and everything in between.",
-      theme: { preset: "plum", fontStyle: "serif" },
-    },
+    update: sailendraData,
+    create: { slug: "sailendra", ...sailendraData },
   });
 
   // The placeholder grandfather tenant from the first seed, replaced by baburao.
@@ -108,7 +108,7 @@ async function main() {
   await prisma.work.createMany({
     data: [
       {
-        tenantId: phanindra.id,
+        tenantId: sailendra.id,
         type: "travel",
         title: "Three Days in Hampi",
         excerpt: "Boulders, ruins, and a river that has seen empires come and go.",
@@ -119,7 +119,7 @@ async function main() {
         sortOrder: 1,
       },
       {
-        tenantId: sailendra.id,
+        tenantId: phanindra.id,
         type: "poem",
         title: "Monsoon Arithmetic",
         excerpt: "A poem about counting rains.",

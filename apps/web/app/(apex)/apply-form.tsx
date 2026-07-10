@@ -7,8 +7,7 @@ import { ApiError, submitApplication } from "@/lib/api";
 
 const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "darbha.info";
 
-const inputCls =
-  "w-full rounded-lg border border-[#b0713b]/25 bg-white px-4 py-2.5 text-[#2b2620] outline-none transition focus:border-[#b0713b] focus:ring-2 focus:ring-[#b0713b]/20";
+const inputCls = "glass-input";
 
 export function ApplyForm() {
   const [state, setState] = useState<"idle" | "submitting" | "done">("idle");
@@ -39,7 +38,7 @@ export function ApplyForm() {
 
   if (state === "done") {
     return (
-      <div className="rounded-xl border border-[#3f6f4f]/30 bg-[#f2f5ef] p-6 text-[#26302a]">
+      <div className="glass-panel p-6 text-[#26302a]">
         <p className="font-semibold">Application received.</p>
         <p className="mt-1 text-sm text-[#6d7a70]">
           We&apos;ll review it and get back to you by email. If approved, your site goes live at{" "}
@@ -116,11 +115,7 @@ export function ApplyForm() {
 
       {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
-      <button
-        type="submit"
-        disabled={state === "submitting"}
-        className="w-full rounded-lg bg-[#b0713b] px-5 py-3 font-semibold text-white transition hover:bg-[#9a6233] disabled:opacity-60"
-      >
+      <button type="submit" disabled={state === "submitting"} className="glass-btn">
         {state === "submitting" ? "Sending..." : "Apply for your subdomain"}
       </button>
     </form>

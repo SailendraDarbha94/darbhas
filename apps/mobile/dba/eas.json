@@ -1,0 +1,32 @@
+{
+  "cli": {
+    "version": ">= 18.4.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.darbha.info/v1",
+        "EXPO_PUBLIC_TENANT_SLUG": "baburao"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.darbha.info/v1",
+        "EXPO_PUBLIC_TENANT_SLUG": "baburao"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

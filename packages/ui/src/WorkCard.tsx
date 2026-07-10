@@ -1,5 +1,5 @@
 import type { TenantTheme, Work } from "@darbha/types";
-import { fontFamilyFor, paletteFor } from "./palettes";
+import { fontFamilyFor, glassStyle, paletteFor } from "./palettes";
 import { formatDate } from "./date";
 
 export interface WorkCardProps {
@@ -8,10 +8,11 @@ export interface WorkCardProps {
   href: string;
 }
 
-/** A single work in the subdomain's list of writings. */
+/** A single work in the subdomain's list of writings, as a frosted-glass card. */
 export function WorkCard({ work, theme, href }: WorkCardProps) {
   const palette = paletteFor(theme);
   const font = fontFamilyFor(theme);
+  const g = palette.glass;
   const date = work.publishedAt ? formatDate(work.publishedAt) : null;
 
   return (
@@ -19,17 +20,27 @@ export function WorkCard({ work, theme, href }: WorkCardProps) {
       href={href}
       className="darbha-card"
       style={{
+        position: "relative",
         display: "block",
+        overflow: "hidden",
         padding: "1.5rem 1.75rem",
-        borderRadius: 16,
+        borderRadius: 18,
         textDecoration: "none",
-        background: palette.surface,
         color: palette.text,
-        border: `1px solid ${palette.accent}1f`,
-        boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-        transition: "transform 150ms ease, box-shadow 150ms ease",
+        transition: "transform 200ms ease, box-shadow 200ms ease",
+        ...glassStyle(palette),
       }}
     >
+      <span
+        aria-hidden
+        style={{
+          position: "absolute",
+          insetInline: 0,
+          top: 0,
+          height: 1,
+          background: `linear-gradient(90deg, transparent, ${g.highlight}, transparent)`,
+        }}
+      />
       {work.coverUrl ? (
         <img
           src={work.coverUrl}
@@ -40,6 +51,7 @@ export function WorkCard({ work, theme, href }: WorkCardProps) {
             objectFit: "cover",
             borderRadius: 12,
             marginBottom: "1rem",
+            border: `1px solid ${g.border}`,
           }}
         />
       ) : null}
@@ -67,6 +79,7 @@ export function WorkCard({ work, theme, href }: WorkCardProps) {
               padding: "0.15rem 0.6rem",
               borderRadius: 999,
               background: `${palette.accent}14`,
+              border: `1px solid ${palette.accent}22`,
               color: palette.accent,
               fontWeight: 600,
             }}

@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "dev:site": "turbo run dev --filter=@darbha/api --filter=@darbha/web",
+    "dev:mobile": "npm --prefix apps/mobile/dba run start",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",

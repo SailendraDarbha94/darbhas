@@ -1,5 +1,5 @@
 import type { TenantProfile, TenantTheme, TimelineEntry } from "@darbha/types";
-import { fontFamilyFor, paletteFor } from "./palettes";
+import { fontFamilyFor, glassStyle, paletteFor } from "./palettes";
 
 export interface TenantLifeProps {
   profile: TenantProfile;
@@ -38,12 +38,23 @@ export function TenantLife({ profile, theme }: TenantLifeProps) {
             <div
               key={fact.label}
               style={{
-                background: palette.surface,
-                border: `1px solid ${palette.accent}1f`,
-                borderRadius: 14,
+                position: "relative",
+                overflow: "hidden",
+                borderRadius: 16,
                 padding: "1rem 1.25rem",
+                ...glassStyle(palette),
               }}
             >
+              <span
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  insetInline: 0,
+                  top: 0,
+                  height: 1,
+                  background: `linear-gradient(90deg, transparent, ${palette.glass.highlight}, transparent)`,
+                }}
+              />
               <div
                 style={{
                   fontSize: "0.72rem",

@@ -1,5 +1,5 @@
 import type { Tenant, TenantTheme } from "@darbha/types";
-import { fontFamilyFor, paletteFor } from "./palettes";
+import { fontFamilyFor, glassStyle, paletteFor } from "./palettes";
 import { GENRE_GLYPHS, GENRE_LABELS } from "./genre";
 
 export interface TenantHeroProps {
@@ -14,44 +14,55 @@ export interface TenantHeroProps {
 export function TenantHero({ tenant, rolesLine }: TenantHeroProps) {
   const palette = paletteFor(tenant.theme);
   const font = fontFamilyFor(tenant.theme);
+  const g = palette.glass;
 
   return (
     <header
       style={{
         padding: "4.5rem 1.5rem 3rem",
         textAlign: "center",
-        background: `linear-gradient(180deg, ${palette.gradient[0]}, transparent)`,
       }}
     >
       {tenant.avatarUrl ? (
         <img
           src={tenant.avatarUrl}
           alt={tenant.displayName}
-          width={88}
-          height={88}
+          width={92}
+          height={92}
           style={{
             borderRadius: "50%",
             objectFit: "cover",
-            border: `3px solid ${palette.surface}`,
-            boxShadow: "0 8px 24px -8px rgba(0,0,0,0.3)",
+            border: `1px solid ${g.border}`,
+            boxShadow: g.shadow,
           }}
         />
       ) : (
         <span
           aria-hidden
           style={{
+            position: "relative",
             display: "inline-flex",
             alignItems: "center",
             justifyContent: "center",
-            width: 88,
-            height: 88,
+            width: 92,
+            height: 92,
             borderRadius: "50%",
-            background: palette.surface,
+            overflow: "hidden",
             color: palette.accent,
             fontSize: "2.25rem",
-            boxShadow: "0 8px 24px -8px rgba(0,0,0,0.2)",
+            ...glassStyle(palette),
           }}
         >
+          <span
+            aria-hidden
+            style={{
+              position: "absolute",
+              insetInline: 0,
+              top: 0,
+              height: 1,
+              background: `linear-gradient(90deg, transparent, ${g.highlight}, transparent)`,
+            }}
+          />
           {GENRE_GLYPHS[tenant.genre]}
         </span>
       )}

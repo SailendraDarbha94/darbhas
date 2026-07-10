@@ -1,4 +1,4 @@
-export { PALETTES, paletteFor, fontFamilyFor, type Palette } from "./palettes";
+export { PALETTES, paletteFor, fontFamilyFor, glassStyle, type Palette, type Glass } from "./palettes";
 export { GENRE_LABELS, GENRE_GLYPHS } from "./genre";
 export { formatDate } from "./date";
 export { TenantCard, type TenantCardProps } from "./TenantCard";

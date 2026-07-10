@@ -1,4 +1,4 @@
-# darbha.info — a family of writers
+# darbha.info — a legacy of writers, travellers & narrators
 
 A multi-tenant platform for the Darbha family. The apex site shows a gallery of every hosted
 Darbha with an application form; each writer gets their own themed subdomain.
@@ -9,6 +9,7 @@ Darbha with an application form; each writer gets their own themed subdomain.
 | `{name}.darbha.info` | same Next.js app | Per-person site (wildcard routing via `proxy.ts`) |
 | `admin.darbha.info` (or `/admin`) | same Next.js app | Writer/admin dashboard (Supabase auth) |
 | `api.darbha.info` | Render/Railway (`apps/api`) | NestJS REST API on Supabase Postgres |
+| DBA (mobile) | Expo (`apps/mobile/dba`) | Darbha Babu Rao memorial app, reads the same API |
 
 ## Layout
 
@@ -16,6 +17,8 @@ Darbha with an application form; each writer gets their own themed subdomain.
 apps/
   web/           Next.js 16 (App Router, Tailwind v4) — apex, subdomains, admin
   api/           NestJS 11 — tenants, works, applications + Supabase JWT auth
+  mobile/
+    dba/         Expo SDK 57 — "DBA" app; standalone npm project, NOT in the pnpm workspace
 packages/
   types/         Shared TypeScript domain types
   ui/            Themeable React components (cards, hero, palettes)
@@ -68,6 +71,7 @@ To let a writer manage a site, link their profile: `update public.profiles set t
 ```bash
 pnpm dev:site     # NestJS api (4400) + Next.js web (3400) only
 pnpm dev          # everything
+pnpm dev:mobile   # Expo app (own npm install first: cd apps/mobile/dba && npm install)
 ```
 
 - Apex: http://localhost:3400

@@ -4,6 +4,7 @@ import type { TenantProfile, TenantTheme, Work, WorkType } from "@darbha/types";
 import { WORK_TYPES } from "@darbha/types";
 import { GENRE_GLYPHS, GENRE_LABELS, TenantHero, TenantLife, WorkCard, fontFamilyFor, paletteFor } from "@darbha/ui";
 import { ApiError, getTenantBySlug } from "@/lib/api";
+import { tenantUrl } from "@/lib/tenant-host";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -13,12 +14,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   try {
     const tenant = await getTenantBySlug(slug);
+    const url = tenantUrl(slug);
+    const description = tenant.bio ?? tenant.tagline ?? `Writing by ${tenant.displayName}`;
     return {
       title: tenant.displayName,
-      description: tenant.tagline ?? `Writing by ${tenant.displayName}`,
+      description,
+      alternates: { canonical: url },
+      openGraph: {
+        type: "profile",
+        url,
+        siteName: tenant.displayName,
+        title: tenant.displayName,
+        description,
+        images: tenant.avatarUrl ? [tenant.avatarUrl] : undefined,
+      },
+      twitter: {
+        card: tenant.avatarUrl ? "summary_large_image" : "summary",
+        title: tenant.displayName,
+        description,
+      },
     };
   } catch {
-    return { title: "Not found" };
+    return { title: "Not found", robots: { index: false } };
   }
 }
 
@@ -38,6 +55,19 @@ export default async function TenantPage({ params }: Props) {
   const palette = paletteFor(theme);
   const font = fontFamilyFor(theme);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    mainEntity: {
+      "@type": "Person",
+      name: tenant.displayName,
+      url: tenantUrl(slug),
+      ...(tenant.bio ?? tenant.tagline ? { description: tenant.bio ?? tenant.tagline } : {}),
+      ...(profile?.roles?.length ? { jobTitle: profile.roles } : {}),
+      ...(tenant.avatarUrl ? { image: tenant.avatarUrl } : {}),
+    },
+  };
+
   // Group works by type, in a stable genre order, so poets-and-playwrights
   // get one section per collection. A single-genre writer sees no headers.
   const groups = WORK_TYPES.map((type) => ({
@@ -46,7 +76,18 @@ export default async function TenantPage({ params }: Props) {
   })).filter((g) => g.works.length > 0);
 
   return (
-    <main style={{ minHeight: "100vh", background: palette.bg, color: palette.text }}>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: palette.ground,
+        backgroundAttachment: "fixed",
+        color: palette.text,
+      }}
+    >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <TenantHero
         tenant={{ ...tenant, theme }}
         rolesLine={profile?.roles?.length ? profile.roles.join(" \u2022 ") : undefined}
