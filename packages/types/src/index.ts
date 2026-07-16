@@ -128,6 +128,8 @@ export const RESERVED_SLUGS = [
   "staging",
   "vercel",
   "supabase",
+  // Would shadow the GET /tenants/me endpoint.
+  "me",
 ];
 
 export const SLUG_REGEX = /^[a-z][a-z0-9-]{1,30}$/;

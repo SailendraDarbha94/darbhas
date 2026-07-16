@@ -29,6 +29,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
     return [
       { url: apexUrl(), lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
+      {
+        url: `${apexUrl()}/privacy`,
+        lastModified: new Date(),
+        changeFrequency: "yearly" as const,
+        priority: 0.3,
+      },
+      {
+        url: `${apexUrl()}/terms`,
+        lastModified: new Date(),
+        changeFrequency: "yearly" as const,
+        priority: 0.3,
+      },
       ...tenants.map((t) => ({
         url: tenantUrl(t.slug),
         lastModified: new Date(t.updatedAt),

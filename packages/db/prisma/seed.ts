@@ -12,9 +12,11 @@ async function main() {
     bio: "Poetry on memory, monsoons, and everything in between.",
     theme: { preset: "plum", fontStyle: "serif" },
   };
+  // NOTE: update is intentionally empty — identity & profile are edited in the
+  // dashboard now; re-seeding must never clobber dashboard edits.
   const phanindra = await prisma.tenant.upsert({
     where: { slug: "phanindra" },
-    update: phanindraData,
+    update: {},
     create: { slug: "phanindra", ...phanindraData },
   });
 
@@ -27,7 +29,7 @@ async function main() {
   };
   const sailendra = await prisma.tenant.upsert({
     where: { slug: "sailendra" },
-    update: sailendraData,
+    update: {},
     create: { slug: "sailendra", ...sailendraData },
   });
 
@@ -76,7 +78,7 @@ async function main() {
 
   const grandfather = await prisma.tenant.upsert({
     where: { slug: "baburao" },
-    update: { profile: baburaoProfile },
+    update: {},
     create: {
       slug: "baburao",
       displayName: "Darbha Babu Rao",

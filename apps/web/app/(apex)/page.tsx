@@ -3,6 +3,7 @@ import type { TenantTheme } from "@darbha/types";
 import { TenantCard } from "@darbha/ui";
 import { getTenants } from "@/lib/api";
 import { SITE_DOMAIN, apexUrl } from "@/lib/tenant-host";
+import { SiteFooter } from "@/components/site-footer";
 import { ApplyForm } from "./apply-form";
 
 const TITLE = "Darbha — a legacy of writers, travellers & narrators";
@@ -25,6 +26,17 @@ export const metadata: Metadata = {
 
 /** The grandfather's memorial site leads the gallery. */
 const FEATURED_SLUG = "baburao";
+
+/**
+ * Card links stay on the host you're browsing: {slug}.localhost in dev
+ * (the proxy handles it), the real subdomain in production.
+ */
+function tenantCardHref(slug: string): string {
+  if (process.env.NODE_ENV === "development") {
+    return `http://${slug}.localhost:3400`;
+  }
+  return `https://${slug}.${SITE_DOMAIN}`;
+}
 
 export default async function ApexPage() {
   let tenants: Awaited<ReturnType<typeof getTenants>> = [];
@@ -82,7 +94,7 @@ export default async function ApexPage() {
               <TenantCard
                 key={tenant.id}
                 tenant={{ ...tenant, theme: tenant.theme as TenantTheme }}
-                href={`https://${tenant.slug}.${SITE_DOMAIN}`}
+                href={tenantCardHref(tenant.slug)}
               />
             ))}
           </div>
@@ -104,10 +116,7 @@ export default async function ApexPage() {
         </div>
       </section>
 
-      <footer className="py-10 text-center text-sm text-[#7d7468]">
-        <span aria-hidden className="mr-2 text-[#b0713b]/60">&#10086;&#xfe0e;</span>
-        {SITE_DOMAIN} — kept by the family
-      </footer>
+      <SiteFooter />
     </main>
   );
 }

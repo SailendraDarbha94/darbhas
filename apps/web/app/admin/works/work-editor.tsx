@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
-import type { Work, WorkType } from "@darbha/types";
+import { useEffect, useRef, useState } from "react";
+import type { Tenant, Work, WorkType } from "@darbha/types";
 import { WORK_TYPES } from "@darbha/types";
 import { GENRE_LABELS } from "@darbha/ui";
 import { adminApi } from "@/lib/api";
@@ -13,13 +13,27 @@ const inputCls =
   "w-full rounded-lg border border-black/15 bg-white px-4 py-2.5 outline-none focus:border-[#b0713b]";
 
 export function WorkEditor({ work }: { work?: Work }) {
-  const { token } = useSession();
+  const { token, me } = useSession();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(work?.coverUrl ?? null);
   const [uploading, setUploading] = useState(false);
   const publishIntent = useRef(work?.published ?? false);
+
+  // Admins must pick which writer a new work belongs to (writers are scoped
+  // server-side, so they never see the picker).
+  const isAdmin = me?.role === "admin";
+  const [tenants, setTenants] = useState<Tenant[] | null>(null);
+  useEffect(() => {
+    if (!token || !isAdmin) return;
+    adminApi
+      .listAllTenants(token)
+      .then(setTenants)
+      .catch(() => {
+        setError("Could not load the list of writers — reload and try again.");
+      });
+  }, [token, isAdmin]);
 
   async function onCoverChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -44,6 +58,8 @@ export function WorkEditor({ work }: { work?: Work }) {
 
     const form = new FormData(event.currentTarget);
     const payload = {
+      // Only present in create mode for admins (the picker enforces a choice).
+      tenantId: form.get("tenantId") ? String(form.get("tenantId")) : undefined,
       title: String(form.get("title")),
       type: String(form.get("type")) as WorkType,
       lang: String(form.get("lang") || "en"),
@@ -85,6 +101,30 @@ export function WorkEditor({ work }: { work?: Work }) {
 
   return (
     <form onSubmit={(e) => void save(e)} className="space-y-5">
+      {tenants && !work ? (
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">Writer</span>
+          <select name="tenantId" required defaultValue="" className={inputCls}>
+            <option value="" disabled>
+              Whose site does this belong to?
+            </option>
+            {tenants.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.displayName} ({t.slug}.darbha.info)
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      {tenants && work ? (
+        <p className="text-sm text-[#7d7468]">
+          Writer:{" "}
+          <span className="font-medium text-[#2b2620]">
+            {tenants.find((t) => t.id === work.tenantId)?.displayName ?? work.tenantId}
+          </span>
+        </p>
+      ) : null}
+
       <label className="block">
         <span className="mb-1 block text-sm font-medium">Title</span>
         <input name="title" required maxLength={200} defaultValue={work?.title} className={inputCls} />

@@ -1,4 +1,11 @@
-import type { Application, Tenant, TenantWithWorks, Work } from "@darbha/types";
+import type { Application, ProfileRole, Tenant, TenantWithWorks, Work } from "@darbha/types";
+
+/** GET /tenants/me — the signed-in caller's role and own tenant (null for unlinked admins). */
+export interface Me {
+  role: ProfileRole;
+  tenantId: string | null;
+  tenant: Tenant | null;
+}
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4400/v1";
 
@@ -51,6 +58,8 @@ function authHeaders(token: string) {
 }
 
 export const adminApi = {
+  me: (token: string) =>
+    request<Me>("/tenants/me", { headers: authHeaders(token), cache: "no-store" }),
   listApplications: (token: string, status?: string) =>
     request<Application[]>(`/applications${status ? `?status=${status}` : ""}`, {
       headers: authHeaders(token),

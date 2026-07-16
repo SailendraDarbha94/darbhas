@@ -32,6 +32,13 @@ export class TenantsController {
     return this.tenants.listAll();
   }
 
+  /** Signed-in caller's role + own tenant. MUST stay declared before the ":slug" route. */
+  @UseGuards(SupabaseAuthGuard)
+  @Get("me")
+  me(@CurrentUser() user: AuthUser) {
+    return this.tenants.getMine(user);
+  }
+
   /** Public: a tenant and its published works (used by subdomains). */
   @Get(":slug")
   bySlug(@Param("slug") slug: string) {

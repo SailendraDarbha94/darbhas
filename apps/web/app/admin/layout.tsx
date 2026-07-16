@@ -5,7 +5,8 @@ import { SessionProvider, useSession } from "./session";
 import { LoginForm } from "./login-form";
 
 function Chrome({ children }: { children: React.ReactNode }) {
-  const { session, loading, signOut } = useSession();
+  const { session, loading, signOut, me } = useSession();
+  const isAdmin = me?.role === "admin";
 
   if (loading) {
     return (
@@ -32,12 +33,19 @@ function Chrome({ children }: { children: React.ReactNode }) {
           <Link href="/admin/works" className="text-sm hover:text-[#b0713b]">
             Works
           </Link>
-          <Link href="/admin/applications" className="text-sm hover:text-[#b0713b]">
-            Applications
+          <Link href="/admin/site" className="text-sm hover:text-[#b0713b]">
+            My Site
           </Link>
-          <Link href="/admin/tenants" className="text-sm hover:text-[#b0713b]">
-            Sites
-          </Link>
+          {isAdmin ? (
+            <>
+              <Link href="/admin/applications" className="text-sm hover:text-[#b0713b]">
+                Applications
+              </Link>
+              <Link href="/admin/tenants" className="text-sm hover:text-[#b0713b]">
+                Sites
+              </Link>
+            </>
+          ) : null}
           <button
             onClick={() => void signOut()}
             className="ml-auto text-sm text-[#7d7468] hover:text-[#2b2620]"

@@ -12,6 +12,7 @@ export default function WorksPage() {
   const { token } = useSession();
   const [works, setWorks] = useState<WorkRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -20,6 +21,21 @@ export default function WorksPage() {
       .then(setWorks)
       .catch((e) => setError(e.message));
   }, [token]);
+
+  async function onDelete(work: WorkRow) {
+    if (!token || deletingId) return;
+    if (!confirm(`Delete "${work.title}"? This cannot be undone.`)) return;
+    setDeletingId(work.id);
+    setError(null);
+    try {
+      await adminApi.deleteWork(token, work.id);
+      setWorks((prev) => prev?.filter((w) => w.id !== work.id) ?? prev);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   if (error) return <p className="text-red-700">{error}</p>;
   if (!works) return <p className="text-[#7d7468]">Loading&hellip;</p>;
@@ -47,6 +63,9 @@ export default function WorksPage() {
                 <th className="px-6 py-3 font-medium">Type</th>
                 <th className="px-6 py-3 font-medium">Status</th>
                 <th className="px-6 py-3 font-medium">Updated</th>
+                <th className="px-6 py-3 font-medium">
+                  <span className="sr-only">Actions</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -72,6 +91,17 @@ export default function WorksPage() {
                   </td>
                   <td className="px-6 py-3 text-[#7d7468]">
                     {new Date(work.updatedAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => void onDelete(work)}
+                      disabled={deletingId !== null}
+                      className="rounded-lg border border-red-200 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                      title={`Delete "${work.title}"`}
+                    >
+                      {deletingId === work.id ? "Deleting…" : "Delete"}
+                    </button>
                   </td>
                 </tr>
               ))}

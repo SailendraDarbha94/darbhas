@@ -25,6 +25,14 @@ export class TenantsService {
     return this.prisma.client.tenant.findMany({ orderBy: { createdAt: "asc" } });
   }
 
+  /** The caller's own role and tenant — how a writer's dashboard finds their site. */
+  async getMine(user: AuthUser) {
+    const tenant = user.tenantId
+      ? await this.prisma.client.tenant.findUnique({ where: { id: user.tenantId } })
+      : null;
+    return { role: user.role, tenantId: user.tenantId, tenant };
+  }
+
   async getBySlugWithWorks(slug: string) {
     const tenant = await this.prisma.client.tenant.findFirst({
       where: { slug, status: "active" },

@@ -126,13 +126,11 @@ export default function HomeScreen() {
           <LinkRow label="🎭 Browse Plays" onPress={() => router.push('/(tabs)/plays')} />
           <LinkRow
             label="🔒 Privacy Policy"
-            onPress={() =>
-              Linking.openURL('https://darbha-baburao-web-dashboard.vercel.app/privacy')
-            }
+            onPress={() => Linking.openURL('https://darbha.info/privacy')}
           />
           <LinkRow
             label="📋 Terms & Conditions"
-            onPress={() => Linking.openURL('https://darbha-baburao-web-dashboard.vercel.app/terms')}
+            onPress={() => Linking.openURL('https://darbha.info/terms')}
             isLast
           />
         </SectionCard>
