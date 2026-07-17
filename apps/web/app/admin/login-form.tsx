@@ -3,6 +3,13 @@
 import { useState } from "react";
 import { useSession } from "./session";
 
+const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "darbha.info";
+
+// Absolute URL on purpose: on admin.darbha.info a relative "/" rewrites back
+// into the admin, so home must be addressed by its full host.
+const HOME_URL =
+  process.env.NODE_ENV === "development" ? "http://localhost:3400" : `https://${SITE_DOMAIN}`;
+
 export function LoginForm() {
   const { signIn } = useSession();
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +26,7 @@ export function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f6f4ef] px-6">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#f6f4ef] px-6">
       <form onSubmit={onSubmit} className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
         <h1 className="font-[family-name:var(--font-serif)] text-2xl">Darbha Studio</h1>
         <p className="mt-1 text-sm text-[#7d7468]">Sign in to manage your writing.</p>
@@ -53,6 +60,13 @@ export function LoginForm() {
           {busy ? "Signing in..." : "Sign in"}
         </button>
       </form>
+
+      <footer className="mt-8 text-center text-sm text-[#7d7468]">
+        <span aria-hidden className="mr-2 text-[#b0713b]/60">&#10086;&#xfe0e;</span>
+        <a href={HOME_URL} className="text-[#b0713b] hover:underline">
+          Back to {SITE_DOMAIN}
+        </a>
+      </footer>
     </div>
   );
 }

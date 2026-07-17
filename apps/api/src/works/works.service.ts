@@ -54,7 +54,12 @@ export class WorksService {
         media: (dto.media ?? {}) as Prisma.InputJsonValue,
         tags: dto.tags ?? [],
         published: dto.published ?? false,
-        publishedAt: dto.published ? new Date() : null,
+        // An explicit date (when the piece was written) beats the upload date.
+        publishedAt: dto.publishedAt
+          ? new Date(dto.publishedAt)
+          : dto.published
+            ? new Date()
+            : null,
         sortOrder: dto.sortOrder ?? 0,
       },
     });
@@ -65,14 +70,19 @@ export class WorksService {
     if (!work) throw new NotFoundException("Work not found");
     this.assertCanTouch(work.tenantId, user);
 
+    const hasExplicitDate = dto.publishedAt !== undefined;
     return this.prisma.client.work.update({
       where: { id },
       data: {
         ...dto,
         media: dto.media as Prisma.InputJsonValue | undefined,
-        // Stamp publishedAt on the pending -> published transition.
-        ...(dto.published === true && !work.published ? { publishedAt: new Date() } : {}),
-        ...(dto.published === false ? { publishedAt: null } : {}),
+        // An explicit date wins; otherwise stamp on the pending -> published
+        // transition and clear on unpublish, as before.
+        ...(hasExplicitDate ? { publishedAt: new Date(dto.publishedAt!) } : {}),
+        ...(!hasExplicitDate && dto.published === true && !work.published
+          ? { publishedAt: new Date() }
+          : {}),
+        ...(!hasExplicitDate && dto.published === false ? { publishedAt: null } : {}),
       },
     });
   }

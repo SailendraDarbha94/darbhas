@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsBoolean,
+  IsDateString,
   IsIn,
   IsInt,
   IsObject,
@@ -54,6 +55,11 @@ export class CreateWorkDto {
   @IsBoolean()
   published?: boolean;
 
+  /** The date shown on the site — when the piece was written, not when it was uploaded. */
+  @IsOptional()
+  @IsDateString()
+  publishedAt?: string;
+
   @IsOptional()
   @IsInt()
   sortOrder?: number;
@@ -98,6 +104,11 @@ export class UpdateWorkDto {
   @IsOptional()
   @IsBoolean()
   published?: boolean;
+
+  /** The date shown on the site — when the piece was written, not when it was uploaded. */
+  @IsOptional()
+  @IsDateString()
+  publishedAt?: string;
 
   @IsOptional()
   @IsInt()

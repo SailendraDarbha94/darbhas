@@ -71,6 +71,8 @@ export function WorkEditor({ work }: { work?: Work }) {
         .filter(Boolean),
       coverUrl: coverUrl ?? undefined,
       published: publish,
+      // The date shown on the site — when it was written, not when it was uploaded.
+      publishedAt: form.get("publishedAt") ? String(form.get("publishedAt")) : undefined,
     };
 
     try {
@@ -130,7 +132,7 @@ export function WorkEditor({ work }: { work?: Work }) {
         <input name="title" required maxLength={200} defaultValue={work?.title} className={inputCls} />
       </label>
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         <label className="block">
           <span className="mb-1 block text-sm font-medium">Type</span>
           <select name="type" defaultValue={work?.type ?? "poem"} className={inputCls}>
@@ -147,6 +149,17 @@ export function WorkEditor({ work }: { work?: Work }) {
             <option value="en">English</option>
             <option value="te">తెలుగు (Telugu)</option>
           </select>
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium">
+            Date <span className="font-normal text-[#7d7468]">(when it was written)</span>
+          </span>
+          <input
+            name="publishedAt"
+            type="date"
+            defaultValue={work?.publishedAt ? work.publishedAt.slice(0, 10) : ""}
+            className={inputCls}
+          />
         </label>
         <label className="block">
           <span className="mb-1 block text-sm font-medium">

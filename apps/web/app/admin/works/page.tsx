@@ -52,61 +52,97 @@ export default function WorksPage() {
         </Link>
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-2xl bg-white shadow-sm">
+      <div className="mt-8 rounded-2xl bg-white shadow-sm">
         {works.length === 0 ? (
           <p className="p-6 text-[#7d7468]">Nothing here yet — write your first piece.</p>
         ) : (
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-black/10 text-[#7d7468]">
-              <tr>
-                <th className="px-6 py-3 font-medium">Title</th>
-                <th className="px-6 py-3 font-medium">Type</th>
-                <th className="px-6 py-3 font-medium">Status</th>
-                <th className="px-6 py-3 font-medium">Updated</th>
-                <th className="px-6 py-3 font-medium">
-                  <span className="sr-only">Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {works.map((work) => (
-                <tr key={work.id} className="border-b border-black/5 last:border-0 hover:bg-black/[0.02]">
-                  <td className="px-6 py-3">
-                    <Link href={`/admin/works/${work.id}`} className="font-medium hover:text-[#b0713b]">
-                      {work.title}
-                    </Link>
-                    {work.tenant ? (
-                      <span className="ml-2 text-xs text-[#7d7468]">({work.tenant.slug})</span>
-                    ) : null}
-                  </td>
-                  <td className="px-6 py-3">{work.type}</td>
-                  <td className="px-6 py-3">
-                    <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                        work.published ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"
-                      }`}
-                    >
-                      {work.published ? "published" : "draft"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 text-[#7d7468]">
-                    {new Date(work.updatedAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-3 text-right">
-                    <button
-                      type="button"
-                      onClick={() => void onDelete(work)}
-                      disabled={deletingId !== null}
-                      className="rounded-lg border border-red-200 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
-                      title={`Delete "${work.title}"`}
-                    >
-                      {deletingId === work.id ? "Deleting…" : "Delete"}
-                    </button>
-                  </td>
+          <div className="overflow-x-auto rounded-2xl">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-black/10 text-[#7d7468]">
+                <tr>
+                  <th className="px-4 py-3 font-medium sm:px-6">Title</th>
+                  <th className="px-4 py-3 font-medium sm:px-6">Type</th>
+                  <th className="hidden px-4 py-3 font-medium sm:px-6 md:table-cell">Tags</th>
+                  <th className="px-4 py-3 font-medium sm:px-6">Status</th>
+                  <th className="hidden px-4 py-3 font-medium sm:table-cell sm:px-6">Updated</th>
+                  <th className="px-4 py-3 font-medium sm:px-6">
+                    <span className="sr-only">Actions</span>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {works.map((work) => (
+                  <tr key={work.id} className="border-b border-black/5 last:border-0 hover:bg-black/[0.02]">
+                    <td className="px-4 py-3 sm:px-6">
+                      <Link href={`/admin/works/${work.id}`} className="font-medium hover:text-[#b0713b]">
+                        {work.title}
+                      </Link>
+                      {work.tenant ? (
+                        <span className="ml-2 text-xs text-[#7d7468]">({work.tenant.slug})</span>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3 sm:px-6">{work.type}</td>
+                    <td className="hidden px-4 py-3 sm:px-6 md:table-cell">
+                      {work.tags.length === 0 ? (
+                        <span className="text-xs text-[#7d7468]">—</span>
+                      ) : (
+                        <span className="flex flex-wrap gap-1">
+                          {work.tags.slice(0, 3).map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full bg-[#b0713b]/10 px-2 py-0.5 text-xs font-semibold text-[#b0713b]"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                          {work.tags.length > 3 ? (
+                            <span
+                              className="text-xs text-[#7d7468]"
+                              title={work.tags.slice(3).join(", ")}
+                            >
+                              +{work.tags.length - 3}
+                            </span>
+                          ) : null}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 sm:px-6">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          work.published ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"
+                        }`}
+                      >
+                        {work.published ? "published" : "draft"}
+                      </span>
+                    </td>
+                    <td className="hidden px-4 py-3 text-[#7d7468] sm:table-cell sm:px-6">
+                      {new Date(work.updatedAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3 text-right sm:px-6">
+                      <span className="inline-flex gap-2 whitespace-nowrap">
+                        <Link
+                          href={`/admin/works/${work.id}`}
+                          className="rounded-lg border border-black/15 px-3 py-1 text-xs font-semibold hover:bg-black/5"
+                          title={`Edit "${work.title}"`}
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => void onDelete(work)}
+                          disabled={deletingId !== null}
+                          className="rounded-lg border border-red-200 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50"
+                          title={`Delete "${work.title}"`}
+                        >
+                          {deletingId === work.id ? "Deleting…" : "Delete"}
+                        </button>
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

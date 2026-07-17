@@ -23,7 +23,7 @@ function Chrome({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#f6f4ef] text-[#2b2620]">
       <nav className="border-b border-black/10 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center gap-6 px-6 py-4">
+        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 sm:gap-6 sm:px-6 sm:py-4">
           <span className="font-[family-name:var(--font-serif)] text-lg font-semibold">
             Darbha Studio
           </span>
@@ -54,7 +54,7 @@ function Chrome({ children }: { children: React.ReactNode }) {
           </button>
         </div>
       </nav>
-      <main className="mx-auto max-w-5xl px-6 py-10">{children}</main>
+      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-10">{children}</main>
     </div>
   );
 }
