@@ -2,11 +2,18 @@
 
 import Link from "next/link";
 import { SessionProvider, useSession } from "./session";
+import { ToastProvider, useToast } from "./toast";
 import { LoginForm } from "./login-form";
 
 function Chrome({ children }: { children: React.ReactNode }) {
   const { session, loading, signOut, me } = useSession();
+  const toast = useToast();
   const isAdmin = me?.role === "admin";
+
+  async function onSignOut() {
+    await signOut();
+    toast.success("Signed out.");
+  }
 
   if (loading) {
     return (
@@ -47,7 +54,7 @@ function Chrome({ children }: { children: React.ReactNode }) {
             </>
           ) : null}
           <button
-            onClick={() => void signOut()}
+            onClick={() => void onSignOut()}
             className="ml-auto text-sm text-[#7d7468] hover:text-[#2b2620]"
           >
             Sign out
@@ -62,7 +69,9 @@ function Chrome({ children }: { children: React.ReactNode }) {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
-      <Chrome>{children}</Chrome>
+      <ToastProvider>
+        <Chrome>{children}</Chrome>
+      </ToastProvider>
     </SessionProvider>
   );
 }

@@ -8,15 +8,16 @@ import { GENRE_LABELS } from "@darbha/ui";
 import { adminApi } from "@/lib/api";
 import { uploadMedia } from "@/lib/supabase";
 import { useSession } from "../session";
+import { useToast } from "../toast";
 
 const inputCls =
   "w-full rounded-lg border border-black/15 bg-white px-4 py-2.5 outline-none focus:border-[#b0713b]";
 
 export function WorkEditor({ work }: { work?: Work }) {
   const { token, me } = useSession();
+  const toast = useToast();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(work?.coverUrl ?? null);
   const [uploading, setUploading] = useState(false);
   const publishIntent = useRef(work?.published ?? false);
@@ -31,19 +32,18 @@ export function WorkEditor({ work }: { work?: Work }) {
       .listAllTenants(token)
       .then(setTenants)
       .catch(() => {
-        setError("Could not load the list of writers — reload and try again.");
+        toast.error("Could not load the list of writers — reload and try again.");
       });
-  }, [token, isAdmin]);
+  }, [token, isAdmin, toast]);
 
   async function onCoverChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    setError(null);
     try {
       setCoverUrl(await uploadMedia(file, "covers"));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Upload failed");
+      toast.error(e instanceof Error ? `Upload failed: ${e.message}` : "Upload failed");
     } finally {
       setUploading(false);
     }
@@ -54,7 +54,6 @@ export function WorkEditor({ work }: { work?: Work }) {
     const publish = publishIntent.current;
     if (!token) return;
     setBusy(true);
-    setError(null);
 
     const form = new FormData(event.currentTarget);
     const payload = {
@@ -81,9 +80,10 @@ export function WorkEditor({ work }: { work?: Work }) {
       } else {
         await adminApi.createWork(token, payload);
       }
+      toast.success(publish ? `Published "${payload.title}"` : `Saved draft "${payload.title}"`);
       router.push("/admin/works");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to save");
+      toast.error(e instanceof Error ? e.message : "Failed to save — try again.");
       setBusy(false);
     }
   }
@@ -94,9 +94,10 @@ export function WorkEditor({ work }: { work?: Work }) {
     setBusy(true);
     try {
       await adminApi.deleteWork(token, work.id);
+      toast.success(`Deleted "${work.title}"`);
       router.push("/admin/works");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to delete");
+      toast.error(e instanceof Error ? e.message : "Failed to delete — try again.");
       setBusy(false);
     }
   }
@@ -197,8 +198,6 @@ export function WorkEditor({ work }: { work?: Work }) {
           placeholder={"# Title\n\nWrite here..."}
         />
       </label>
-
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
 
       <div className="flex flex-wrap gap-3">
         <button

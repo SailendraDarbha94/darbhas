@@ -1,0 +1,19 @@
+# Builds the darbha API image (apps/api/Dockerfile, repo-root context) and
+# pushes it to Artifact Registry. Manual: gcloud builds submit --config
+# cloudbuild.yaml --substitutions=_TAG=$(git rev-parse --short HEAD) .
+# A future GitHub trigger can pass _TAG=$SHORT_SHA for push-to-deploy.
+substitutions:
+  _TAG: manual
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      [
+        "build",
+        "-f",
+        "apps/api/Dockerfile",
+        "-t",
+        "asia-south1-docker.pkg.dev/$PROJECT_ID/darbha/api:$_TAG",
+        ".",
+      ]
+images:
+  - asia-south1-docker.pkg.dev/$PROJECT_ID/darbha/api:$_TAG

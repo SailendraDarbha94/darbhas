@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession } from "./session";
+import { useToast } from "./toast";
 
 const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "darbha.info";
 
@@ -12,16 +13,19 @@ const HOME_URL =
 
 export function LoginForm() {
   const { signIn } = useSession();
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
   const [busy, setBusy] = useState(false);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
-    setError(null);
     const form = new FormData(event.currentTarget);
     const message = await signIn(String(form.get("email")), String(form.get("password")));
-    if (message) setError(message);
+    if (message) {
+      toast.error(message);
+    } else {
+      toast.success("Signed in — welcome back.");
+    }
     setBusy(false);
   }
 
@@ -49,8 +53,6 @@ export function LoginForm() {
             className="w-full rounded-lg border border-black/15 px-4 py-2.5 outline-none focus:border-[#b0713b]"
           />
         </label>
-
-        {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
 
         <button
           type="submit"

@@ -6,11 +6,13 @@ import { THEME_PRESETS } from "@darbha/types";
 import { GENRE_LABELS, PALETTES } from "@darbha/ui";
 import { adminApi } from "@/lib/api";
 import { useSession } from "../session";
+import { useToast } from "../toast";
 
 const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "darbha.info";
 
 export default function TenantsPage() {
   const { token } = useSession();
+  const toast = useToast();
   const [tenants, setTenants] = useState<Tenant[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,16 +29,29 @@ export default function TenantsPage() {
   async function setTheme(tenant: Tenant, preset: TenantTheme["preset"]) {
     if (!token) return;
     const theme = { ...(tenant.theme as TenantTheme), preset };
-    await adminApi.updateTenant(token, tenant.id, { theme });
-    refresh();
+    try {
+      await adminApi.updateTenant(token, tenant.id, { theme });
+      toast.success(`Theme set to ${preset} for ${tenant.displayName}`);
+      refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not change the theme — try again.");
+    }
   }
 
   async function toggleStatus(tenant: Tenant) {
     if (!token) return;
-    await adminApi.updateTenant(token, tenant.id, {
-      status: tenant.status === "active" ? "hidden" : "active",
-    });
-    refresh();
+    const next = tenant.status === "active" ? "hidden" : "active";
+    try {
+      await adminApi.updateTenant(token, tenant.id, { status: next });
+      toast.success(
+        next === "hidden"
+          ? `${tenant.displayName} is now hidden from the gallery`
+          : `${tenant.displayName} is visible again`,
+      );
+      refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not change visibility — try again.");
+    }
   }
 
   if (error) return <p className="text-red-700">{error} (admin access required)</p>;

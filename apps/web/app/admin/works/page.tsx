@@ -5,11 +5,13 @@ import { useEffect, useState } from "react";
 import type { Work } from "@darbha/types";
 import { adminApi } from "@/lib/api";
 import { useSession } from "../session";
+import { useToast } from "../toast";
 
 type WorkRow = Work & { tenant?: { slug: string; displayName: string } };
 
 export default function WorksPage() {
   const { token } = useSession();
+  const toast = useToast();
   const [works, setWorks] = useState<WorkRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -26,12 +28,12 @@ export default function WorksPage() {
     if (!token || deletingId) return;
     if (!confirm(`Delete "${work.title}"? This cannot be undone.`)) return;
     setDeletingId(work.id);
-    setError(null);
     try {
       await adminApi.deleteWork(token, work.id);
       setWorks((prev) => prev?.filter((w) => w.id !== work.id) ?? prev);
+      toast.success(`Deleted "${work.title}"`);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to delete");
+      toast.error(e instanceof Error ? e.message : "Failed to delete — try again.");
     } finally {
       setDeletingId(null);
     }

@@ -6,6 +6,7 @@ import { THEME_PRESETS } from "@darbha/types";
 import { PALETTES } from "@darbha/ui";
 import { adminApi } from "@/lib/api";
 import { uploadMedia } from "@/lib/supabase";
+import { useToast } from "../toast";
 
 const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "darbha.info";
 
@@ -33,6 +34,7 @@ interface RowsState {
  * Mount with key={tenant.id} so switching sites resets the form.
  */
 export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string }) {
+  const toast = useToast();
   const theme = tenant.theme as TenantTheme;
   const profile = (tenant.profile ?? {}) as TenantProfile;
 
@@ -54,11 +56,8 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
 
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   function mutateRows(kind: keyof RowsState, fn: (list: TimelineEntry[]) => TimelineEntry[]) {
-    setSaved(false);
     setRows((prev) => ({ ...prev, [kind]: fn(prev[kind]) }));
   }
 
@@ -66,12 +65,10 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
     const file = event.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    setError(null);
     try {
       setAvatarUrl(await uploadMedia(file, "avatars"));
-      setSaved(false);
     } catch (e) {
-      setError(
+      toast.error(
         e instanceof Error
           ? `Photo upload failed: ${e.message}`
           : "Photo upload failed — try again.",
@@ -84,8 +81,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
   async function onSave(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
-    setError(null);
-    setSaved(false);
 
     const cleanRows = (list: TimelineEntry[]) =>
       list
@@ -125,9 +120,12 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
         theme: { ...theme, preset },
         profile: nextProfile,
       });
-      setSaved(true);
+      toast.success(`Saved ${displayName.trim() || tenant.displayName} — live within a minute.`, {
+        label: "View site →",
+        href: siteUrl(tenant.slug),
+      });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to save — try again.");
+      toast.error(e instanceof Error ? e.message : "Failed to save — try again.");
     } finally {
       setBusy(false);
     }
@@ -148,7 +146,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
                 value={displayName}
                 onChange={(e) => {
                   setDisplayName(e.target.value);
-                  setSaved(false);
                 }}
                 className={inputCls}
               />
@@ -162,7 +159,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
                 value={tagline}
                 onChange={(e) => {
                   setTagline(e.target.value);
-                  setSaved(false);
                 }}
                 className={inputCls}
                 placeholder="Poems, mostly at night"
@@ -179,7 +175,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
               value={bio}
               onChange={(e) => {
                 setBio(e.target.value);
-                setSaved(false);
               }}
               className={inputCls}
             />
@@ -206,7 +201,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
                     type="button"
                     onClick={() => {
                       setAvatarUrl("");
-                      setSaved(false);
                     }}
                     className="text-sm text-red-700 hover:underline"
                   >
@@ -225,7 +219,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
                     title={p}
                     onClick={() => {
                       setPreset(p);
-                      setSaved(false);
                     }}
                     className={`h-8 w-8 rounded-full border-2 transition ${
                       preset === p ? "border-[#2b2620]" : "border-transparent"
@@ -258,7 +251,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
               value={roles}
               onChange={(e) => {
                 setRoles(e.target.value);
-                setSaved(false);
               }}
               className={inputCls}
               placeholder="Educator, Scholar, Poet, Playwright"
@@ -272,7 +264,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
                 value={bornDate}
                 onChange={(e) => {
                   setBornDate(e.target.value);
-                  setSaved(false);
                 }}
                 className={inputCls}
                 placeholder="9th February, 1946"
@@ -284,7 +275,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
                 value={bornPlace}
                 onChange={(e) => {
                   setBornPlace(e.target.value);
-                  setSaved(false);
                 }}
                 className={inputCls}
                 placeholder="Bapatla, Andhra Pradesh"
@@ -299,7 +289,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
                 value={father}
                 onChange={(e) => {
                   setFather(e.target.value);
-                  setSaved(false);
                 }}
                 className={inputCls}
               />
@@ -310,7 +299,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
                 value={mother}
                 onChange={(e) => {
                   setMother(e.target.value);
-                  setSaved(false);
                 }}
                 className={inputCls}
               />
@@ -336,8 +324,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
         }}
       />
 
-      {error ? <p className="text-sm text-red-700">{error}</p> : null}
-
       <div className="flex flex-wrap items-center gap-4">
         <button
           type="submit"
@@ -346,20 +332,6 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
         >
           {busy ? "Saving…" : "Save"}
         </button>
-        {saved ? (
-          <span className="text-sm text-green-700">
-            Saved ✓{" "}
-            <a
-              href={siteUrl(tenant.slug)}
-              target="_blank"
-              rel="noreferrer"
-              className="text-[#b0713b] underline"
-            >
-              View site →
-            </a>
-            <span className="ml-1 text-[#7d7468]">(public pages refresh within a minute)</span>
-          </span>
-        ) : null}
       </div>
     </form>
   );

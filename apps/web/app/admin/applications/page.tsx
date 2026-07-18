@@ -5,9 +5,11 @@ import type { Application } from "@darbha/types";
 import { GENRE_LABELS } from "@darbha/ui";
 import { adminApi } from "@/lib/api";
 import { useSession } from "../session";
+import { useToast } from "../toast";
 
 export default function ApplicationsPage() {
   const { token } = useSession();
+  const toast = useToast();
   const [apps, setApps] = useState<Application[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -22,14 +24,22 @@ export default function ApplicationsPage() {
 
   useEffect(refresh, [refresh]);
 
-  async function review(id: string, status: "approved" | "rejected") {
+  async function review(app: Application, status: "approved" | "rejected") {
     if (!token) return;
-    setBusyId(id);
+    setBusyId(app.id);
     try {
-      await adminApi.reviewApplication(token, id, status);
+      await adminApi.reviewApplication(token, app.id, status);
+      if (status === "approved") {
+        toast.success(`Approved — ${app.requestedSlug}.darbha.info is live`, {
+          label: "Open →",
+          href: `https://${app.requestedSlug}.darbha.info`,
+        });
+      } else {
+        toast.success(`Rejected ${app.firstName} ${app.lastName}'s application`);
+      }
       refresh();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to review");
+      toast.error(e instanceof Error ? e.message : "Failed to review — try again.");
     } finally {
       setBusyId(null);
     }
@@ -77,14 +87,14 @@ export default function ApplicationsPage() {
                 <div className="mt-4 flex gap-3">
                   <button
                     disabled={busyId === app.id}
-                    onClick={() => void review(app.id, "approved")}
+                    onClick={() => void review(app, "approved")}
                     className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800 disabled:opacity-60"
                   >
                     Approve &amp; create site
                   </button>
                   <button
                     disabled={busyId === app.id}
-                    onClick={() => void review(app.id, "rejected")}
+                    onClick={() => void review(app, "rejected")}
                     className="rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
                   >
                     Reject
