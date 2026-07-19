@@ -8,7 +8,7 @@ Darbha with an application form; each writer gets their own themed subdomain.
 | `darbha.info` | Vercel (`apps/web`) | Gallery of Darbha cards + "apply for a subdomain" form |
 | `{name}.darbha.info` | same Next.js app | Per-person site (wildcard routing via `proxy.ts`) |
 | `admin.darbha.info` (or `/admin`) | same Next.js app | Writer/admin dashboard (Supabase auth) |
-| `api.darbha.info` | Render/Railway (`apps/api`) | NestJS REST API on Supabase Postgres |
+| `api.darbha.info` | Google Cloud Run (`apps/api`) | NestJS REST API on Supabase Postgres |
 | DBA (mobile) | Expo (`apps/mobile/dba`) | Darbha Babu Rao memorial app, reads the same API |
 
 ## Layout
@@ -30,7 +30,7 @@ packages/
 
 - Node >= 20.9, pnpm 10 (`corepack enable`)
 - A Supabase project (free tier is fine)
-- Accounts on Vercel and Render (or Railway/Fly) for deploys
+- Accounts on Vercel (web + DNS) and Google Cloud (API on Cloud Run) for deploys
 
 ## First-time setup
 
@@ -97,21 +97,38 @@ dashboard creates the tenant row and the subdomain is live immediately.
 
 Create the project, run the migration + `setup.sql` as above.
 
-### 2. API -> Render (or Railway/Fly)
+### 2. API -> Google Cloud Run
 
-[render.yaml](render.yaml) is a Render blueprint using [apps/api/Dockerfile](apps/api/Dockerfile)
-(context = repo root). Set `DATABASE_URL` (pooled, port 6543) and `SUPABASE_URL`.
-Point `api.darbha.info` at the service.
+The API runs as a container on Cloud Run in `asia-southeast1` (Singapore — nearest
+region to the Supabase Mumbai database that supports domain mappings; Mumbai itself
+doesn't). Built remotely with Cloud Build from [apps/api/Dockerfile](apps/api/Dockerfile)
+via [cloudbuild.yaml](cloudbuild.yaml):
+
+```bash
+gcloud builds submit --config cloudbuild.yaml --substitutions=_TAG=$(git rev-parse --short HEAD) .
+gcloud run deploy darbha-api \
+  --image asia-south1-docker.pkg.dev/PROJECT/darbha/api:TAG \
+  --region asia-southeast1 --allow-unauthenticated --min-instances 0 --memory 512Mi \
+  --set-secrets DATABASE_URL=darbha-database-url:latest \
+  --set-env-vars SUPABASE_URL=...,SITE_DOMAIN=darbha.info,CORS_ORIGINS=https://darbha.info
+```
+
+`DATABASE_URL` (pooled, port 6543) lives in Secret Manager. The custom domain is a
+Cloud Run domain mapping (`gcloud beta run domain-mappings create --service darbha-api
+--domain api.darbha.info`) — requires the domain verified in Search Console under the
+same Google account.
 
 ### 3. Web -> Vercel
 
 - Import the repo, set the project root to `apps/web` (build config in `apps/web/vercel.json`).
 - Env vars: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SITE_DOMAIN`, `NEXT_PUBLIC_SUPABASE_URL`,
   `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-- Domains: add `darbha.info` **and** `*.darbha.info` to the project. In your DNS, point
-  `@` to Vercel's A record (76.76.21.21) and `*` as a CNAME to `cname.vercel-dns.com`.
-  Vercel issues the wildcard certificate automatically (domain must use Vercel nameservers
-  or the CNAME method).
+- Domains: add `darbha.info` **and** `*.darbha.info` to the project (buying ≠ attaching —
+  both entries are needed). The domain lives on Vercel's nameservers, which is what makes
+  the `*.darbha.info` wildcard certificate automatic.
+- DNS (managed in Vercel): one explicit record peels the API off the wildcard —
+  `CNAME api -> ghs.googlehosted.com` (explicit records beat `*`, so `api` routes to
+  Cloud Run while every writer subdomain stays on Vercel).
 
 ## API surface (prefix `/v1`)
 
