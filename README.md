@@ -37,7 +37,9 @@ packages/
 ```bash
 pnpm install
 
-# 1. Point Prisma at Supabase (direct connection, port 5432)
+# 1. Point Prisma at Supabase — use the SESSION-MODE POOLER (port 5432,
+#    aws-<n>-<region>.pooler.supabase.com). The old db.<ref>.supabase.co
+#    direct host is IPv6-only and won't resolve on most networks.
 cp packages/db/.env.example packages/db/.env   # fill in DATABASE_URL
 
 # 2. Create tables, then seed the three starter tenants
@@ -91,6 +93,33 @@ pnpm dev:mobile   # Expo app (own npm install first: cd apps/mobile/dba && npm i
 Adding a Darbha is a data change, not a deploy: approving an application in the admin
 dashboard creates the tenant row and the subdomain is live immediately.
 
+Public pages cache API data for 60s, so edits appear on the live site within a minute
+or so of saving.
+
+## The admin — Darbha Studio
+
+`admin.darbha.info` (Supabase email/password auth; roles come from `public.profiles`):
+
+- **Works** — write/edit in Markdown, cover images, tags, language (English/Telugu),
+  draft vs published, and an explicit date field (when the piece was *written*, not
+  uploaded). Admins pick which writer a new work belongs to; writers are scoped to
+  their own site automatically.
+- **My Site** — each writer edits their own public identity: display name, tagline,
+  bio, photo, theme preset, and the structured "Life" profile (roles, born, parents,
+  education/career timelines). Blank sections simply don't render publicly. Admins get
+  a site picker to curate any site (e.g. Baburao's memorial page).
+- **Applications** (admin) — approve to create the tenant + live subdomain, or reject.
+- **Sites** (admin) — theme presets and gallery visibility per tenant.
+- Every action confirms or fails via glass toasts (top right).
+
+## SEO & discovery
+
+Each host serves its own `robots.txt` and `sitemap.xml` (the apex also lists every
+writer's homepage; `admin.` disallows crawling). Pages carry canonical URLs, OpenGraph
+tags, and JSON-LD (`Person` on tenant pages, `CreativeWork` with `inLanguage` on works).
+Google Search Console is verified as a **Domain property** (DNS TXT in Vercel), which
+covers the apex and every `*.darbha.info` subdomain with one verification.
+
 ## Deploy
 
 ### 1. Supabase
@@ -118,6 +147,9 @@ Cloud Run domain mapping (`gcloud beta run domain-mappings create --service darb
 --domain api.darbha.info`) — requires the domain verified in Search Console under the
 same Google account.
 
+Note the deploy asymmetry: the web app auto-deploys on every push to `main` (Vercel),
+but the API is deployed manually with the two commands above.
+
 ### 3. Web -> Vercel
 
 - Import the repo, set the project root to `apps/web` (build config in `apps/web/vercel.json`).
@@ -136,6 +168,7 @@ same Google account.
 | --- | --- | --- | --- |
 | GET | `/tenants` | public | Active tenants (gallery cards) |
 | GET | `/tenants/:slug` | public | Tenant + published works (subdomains) |
+| GET | `/tenants/me` | signed-in | Caller's role + own tenant (drives the dashboard) |
 | GET | `/tenants/all` | admin | Every tenant incl. hidden |
 | POST/PATCH/DELETE | `/tenants` | admin (writers may PATCH their own) | Manage sites |
 | GET/POST/PATCH/DELETE | `/works` | writer/admin | CRUD works (writers scoped to their tenant) |
