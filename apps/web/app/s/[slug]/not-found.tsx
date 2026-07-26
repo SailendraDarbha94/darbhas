@@ -9,7 +9,7 @@ export default function TenantNotFound() {
         yours.
       </p>
       <a
-        href={`https://${SITE_DOMAIN}/#apply`}
+        href={`https://${SITE_DOMAIN}/apply`}
         className="mt-8 rounded-lg bg-[#b0713b] px-6 py-3 font-semibold text-white transition hover:bg-[#9a6233]"
       >
         Apply for this subdomain

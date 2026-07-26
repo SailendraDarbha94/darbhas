@@ -4,7 +4,6 @@ import { TenantCard } from "@darbha/ui";
 import { getTenants } from "@/lib/api";
 import { SITE_DOMAIN, apexUrl } from "@/lib/tenant-host";
 import { SiteFooter } from "@/components/site-footer";
-import { ApplyForm } from "./apply-form";
 
 const TITLE = "Darbha — a legacy of writers, travellers & narrators";
 const DESCRIPTION =
@@ -102,17 +101,19 @@ export default async function ApexPage() {
       </section>
 
       <section id="apply" className="mx-auto max-w-xl px-6 pb-24">
-        <div className="glass-panel p-8 sm:p-10">
+        <div className="glass-panel p-8 text-center sm:p-10">
           <h2 className="font-[family-name:var(--font-serif)] text-3xl font-medium">
             Are you a Darbha?
           </h2>
-          <p className="mt-3 leading-relaxed text-[#7d7468]">
-            If you share the name and you write — poems, plays, essays, anything — apply for your
-            own <span className="font-semibold text-[#2b2620]">yourname.{SITE_DOMAIN}</span>.
+          <p className="mx-auto mt-3 max-w-md leading-relaxed text-[#7d7468]">
+            Get your
+            own <span className="font-semibold text-[#2b2620]">yourname.{SITE_DOMAIN}</span>
+            <br />
+            to share your works.
           </p>
-          <div className="mt-8">
-            <ApplyForm />
-          </div>
+          <a href="/apply" className="glass-btn mt-8 px-10">
+            Apply for a subdomain
+          </a>
         </div>
       </section>
 

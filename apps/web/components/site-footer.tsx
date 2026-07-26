@@ -35,7 +35,7 @@ export function SiteFooter() {
                   </a>
                 </li>
                 <li>
-                  <a href="/#apply" className="hover:text-[#2b2620] hover:underline">
+                  <a href="/apply" className="hover:text-[#2b2620] hover:underline">
                     Apply for a subdomain
                   </a>
                 </li>

@@ -30,6 +30,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [
       { url: apexUrl(), lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
       {
+        url: `${apexUrl()}/apply`,
+        lastModified: new Date(),
+        changeFrequency: "yearly" as const,
+        priority: 0.5,
+      },
+      {
         url: `${apexUrl()}/privacy`,
         lastModified: new Date(),
         changeFrequency: "yearly" as const,
