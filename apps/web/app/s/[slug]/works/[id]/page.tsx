@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import type { TenantTheme } from "@darbha/types";
-import { fontFamilyFor, formatDate, paletteFor } from "@darbha/ui";
+import { GENRE_LABELS, fontFamilyFor, formatDate, glassStyle, paletteFor, type Palette } from "@darbha/ui";
 import { ApiError, getTenantBySlug } from "@/lib/api";
 import { tenantUrl } from "@/lib/tenant-host";
 
@@ -51,6 +51,63 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   };
 }
 
+/** One glass card in the bottom nav: a neighbouring work or the way home. */
+function NavCard({
+  href,
+  eyebrow,
+  title,
+  lang,
+  align,
+  palette,
+  font,
+}: {
+  href: string;
+  eyebrow: string;
+  title: string;
+  lang?: string;
+  align: "left" | "right";
+  palette: Palette;
+  font: string;
+}) {
+  return (
+    <a
+      href={href}
+      className="darbha-card"
+      style={{
+        flex: "1 1 240px",
+        display: "block",
+        padding: "1rem 1.25rem",
+        borderRadius: 16,
+        textDecoration: "none",
+        color: palette.text,
+        textAlign: align,
+        transition: "transform 200ms ease, box-shadow 200ms ease",
+        ...glassStyle(palette),
+      }}
+    >
+      <span
+        style={{
+          display: "block",
+          fontSize: "0.72rem",
+          fontWeight: 700,
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          color: palette.accent,
+          marginBottom: "0.3rem",
+        }}
+      >
+        {eyebrow}
+      </span>
+      <span
+        lang={lang && lang !== "en" ? lang : undefined}
+        style={{ fontFamily: font, fontSize: "1.05rem", lineHeight: 1.5 }}
+      >
+        {title}
+      </span>
+    </a>
+  );
+}
+
 export default async function WorkPage(props: Props) {
   const data = await load(props);
   if (!data) notFound();
@@ -61,6 +118,14 @@ export default async function WorkPage(props: Props) {
   const font = fontFamilyFor(theme);
 
   const date = work.publishedAt ? formatDate(work.publishedAt) : null;
+
+  // Previous/next within the same collection (poems ↔ poems, talks ↔ talks),
+  // in the order the tenant page lists them. The tenant is already loaded
+  // with all published works, so this costs nothing.
+  const siblings = tenant.works.filter((w) => w.type === work.type);
+  const index = siblings.findIndex((w) => w.id === work.id);
+  const prev = index > 0 ? siblings[index - 1] : null;
+  const next = index >= 0 && index < siblings.length - 1 ? siblings[index + 1] : null;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -130,6 +195,67 @@ export default async function WorkPage(props: Props) {
         >
           <ReactMarkdown>{work.body}</ReactMarkdown>
         </div>
+
+        <nav
+          aria-label={`More ${GENRE_LABELS[work.type].toLowerCase()} by ${tenant.displayName}`}
+          style={{ display: "flex", flexWrap: "wrap", gap: "0.9rem", marginTop: "3.5rem" }}
+        >
+          {/* Every work gets two cards (uniform footer); missing neighbours
+              become "Back to home". A lone work gets one full-width home card. */}
+          {!prev && !next ? (
+            <NavCard
+              href="/"
+              eyebrow="← Back to home"
+              title={tenant.displayName}
+              align="left"
+              palette={palette}
+              font={font}
+            />
+          ) : (
+            <>
+              {prev ? (
+                <NavCard
+                  href={`/works/${prev.id}`}
+                  eyebrow="← Previous"
+                  title={prev.title}
+                  lang={prev.lang}
+                  align="left"
+                  palette={palette}
+                  font={font}
+                />
+              ) : (
+                <NavCard
+                  href="/"
+                  eyebrow="← Back to home"
+                  title={tenant.displayName}
+                  align="left"
+                  palette={palette}
+                  font={font}
+                />
+              )}
+              {next ? (
+                <NavCard
+                  href={`/works/${next.id}`}
+                  eyebrow="Next →"
+                  title={next.title}
+                  lang={next.lang}
+                  align="right"
+                  palette={palette}
+                  font={font}
+                />
+              ) : (
+                <NavCard
+                  href="/"
+                  eyebrow="Back to home →"
+                  title={tenant.displayName}
+                  align="right"
+                  palette={palette}
+                  font={font}
+                />
+              )}
+            </>
+          )}
+        </nav>
       </article>
     </main>
   );
