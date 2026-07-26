@@ -116,6 +116,14 @@ body {
   opacity: 0.6;
 }
 
+/* Link-styled variant: buttons stay full-width, anchor CTAs hug their text. */
+a.glass-btn {
+  display: inline-block;
+  width: auto;
+  text-decoration: none;
+  text-align: center;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .glass-btn,
   .glass-input {
@@ -235,15 +243,36 @@ body {
   font-size: 1.1em;
 }
 
+/* Tailwind preflight strips list markers; restore them for reader-facing bodies. */
 .work-body ul,
 .work-body ol {
   margin: 0 0 1.25em;
   padding-left: 1.5em;
 }
 
+.work-body ul {
+  list-style: disc;
+}
+
+.work-body ol {
+  list-style: decimal;
+}
+
 .work-body img {
   max-width: 100%;
   border-radius: 12px;
+}
+
+/* Tailwind preflight strips link styling; make links visible in any palette. */
+.work-body a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1px;
+}
+
+.work-body a:hover {
+  text-decoration-thickness: 2px;
 }
 
 /* Telugu content: Noto Serif Telugu with generous line height for stacked glyphs. */
