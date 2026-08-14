@@ -17,6 +17,12 @@ export interface TenantTheme {
   accent?: string;
   /** Serif for poetry/plays, sans for travel logs, etc. */
   fontStyle?: "serif" | "sans";
+  /**
+   * Optional Google font family for the site's Latin text. Only families in
+   * the curated SITE_FONTS whitelist (packages/ui) ever take effect — unknown
+   * values are ignored at render time. Telugu always uses Noto Serif Telugu.
+   */
+  font?: string;
 }
 
 /** A dated (or period) entry in a life timeline: education, career, etc. */
@@ -84,6 +90,8 @@ export interface Application {
   lastName: string;
   requestedSlug: string;
   email: string;
+  /** Contact number for the community outreach call; "" on older applications. */
+  phone: string;
   message: string | null;
   genre: WorkType;
   status: ApplicationStatus;

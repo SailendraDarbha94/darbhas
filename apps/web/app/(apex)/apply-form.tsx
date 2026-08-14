@@ -26,6 +26,7 @@ export function ApplyForm() {
         lastName: String(form.get("lastName")),
         requestedSlug: String(form.get("requestedSlug")).toLowerCase().trim(),
         email: String(form.get("email")),
+        phone: String(form.get("phone")).trim(),
         genre: String(form.get("genre")),
         message: String(form.get("message") || "") || undefined,
       });
@@ -41,8 +42,9 @@ export function ApplyForm() {
       <div className="glass-panel p-6 text-[#26302a]">
         <p className="font-semibold">Application received.</p>
         <p className="mt-1 text-sm text-[#6d7a70]">
-          We&apos;ll review it and get back to you by email. If approved, your site goes live at{" "}
-          <span className="font-medium">{slug || "yourname"}.{SITE_DOMAIN}</span>.
+          A member of the community will reach out to you on the number you shared. If approved,
+          you&apos;ll get an email invitation to set up your writer login, and your site goes live
+          at <span className="font-medium">{slug || "yourname"}.{SITE_DOMAIN}</span>.
         </p>
       </div>
     );
@@ -73,7 +75,7 @@ export function ApplyForm() {
           <input
             name="requestedSlug"
             required
-            pattern="[a-z][a-z0-9-]{1,30}"
+            pattern="[a-z][a-z0-9\-]{1,30}"
             title="Lowercase letters, digits and hyphens; starts with a letter"
             className={inputCls}
             placeholder="ananta"
@@ -87,6 +89,25 @@ export function ApplyForm() {
       <label className="block">
         <span className="mb-1 block text-sm font-medium">Email</span>
         <input name="email" type="email" required className={inputCls} placeholder="you@example.com" />
+        <p className="mt-1 text-xs text-[#7d7468]">
+          If approved, your invitation to set up your login lands here.
+        </p>
+      </label>
+
+      <label className="block">
+        <span className="mb-1 block text-sm font-medium">Phone</span>
+        <input
+          name="phone"
+          type="tel"
+          required
+          pattern="(?=(?:[^0-9]*[0-9]){7})\+?[0-9\(\)\-][0-9\(\)\s\-]{5,18}[0-9\(\)\-]"
+          title="7-20 digits; spaces, dashes and a leading + are fine"
+          className={inputCls}
+          placeholder="+91 98765 43210"
+        />
+        <p className="mt-1 text-xs text-[#7d7468]">
+          A member of the community will reach out to you on this number.
+        </p>
       </label>
 
       <label className="block">

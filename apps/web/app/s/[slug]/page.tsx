@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import type { TenantProfile, TenantTheme, Work, WorkType } from "@darbha/types";
 import { WORK_TYPES } from "@darbha/types";
 import { GENRE_GLYPHS, GENRE_LABELS, TenantHero, TenantLife, WorkCard, fontFamilyFor, paletteFor } from "@darbha/ui";
+import { TenantFontLinks } from "@/components/tenant-font-links";
 import { ApiError, getTenantBySlug } from "@/lib/api";
+import { jsonLdHtml } from "@/lib/json-ld";
 import { tenantUrl } from "@/lib/tenant-host";
 
 interface Props {
@@ -86,8 +88,9 @@ export default async function TenantPage({ params }: Props) {
     >
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }}
       />
+      <TenantFontLinks font={theme?.font} />
       <TenantHero
         tenant={{ ...tenant, theme }}
         rolesLine={profile?.roles?.length ? profile.roles.join(" \u2022 ") : undefined}

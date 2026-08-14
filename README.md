@@ -91,7 +91,12 @@ pnpm dev:mobile   # Expo app (own npm install first: cd apps/mobile/dba && npm i
   published works) from the API and renders the shared template with that tenant's palette
 
 Adding a Darbha is a data change, not a deploy: approving an application in the admin
-dashboard creates the tenant row and the subdomain is live immediately.
+dashboard creates the tenant row and the subdomain is live immediately. Approval also
+emails the applicant a Supabase invite — they set their own password at `/welcome` and
+their login is auto-linked to the new site (requires `SUPABASE_SERVICE_ROLE_KEY` on the
+API; without it the site is still created and the toast tells the admin to onboard
+manually). Applications collect a phone number so a community member can call to verify
+before approving.
 
 Public pages cache API data for 60s, so edits appear on the live site within a minute
 or so of saving.
@@ -108,8 +113,13 @@ or so of saving.
   bio, photo, theme preset, and the structured "Life" profile (roles, born, parents,
   education/career timelines). Blank sections simply don't render publicly. Admins get
   a site picker to curate any site (e.g. Baburao's memorial page).
-- **Applications** (admin) — approve to create the tenant + live subdomain, or reject.
+- **Applications** (admin) — approve to create the tenant + live subdomain (and send the
+  writer their invite email), or reject. Cards show the applicant's phone for the
+  community outreach call.
 - **Sites** (admin) — theme presets and gallery visibility per tenant.
+- **Settings** — change your password (current password required).
+- My Site also offers a curated Google-font picker for a site's Latin text
+  (whitelisted families only; Telugu always renders in Noto Serif Telugu).
 - Every action confirms or fails via glass toasts (top right).
 
 ## SEO & discovery
@@ -146,6 +156,14 @@ gcloud run deploy darbha-api \
 Cloud Run domain mapping (`gcloud beta run domain-mappings create --service darbha-api
 --domain api.darbha.info`) — requires the domain verified in Search Console under the
 same Google account.
+
+For approval invite emails, also store the Supabase service-role key as a secret and
+mount it (plus allow the redirect): create secret `darbha-service-role-key`, add
+`--set-secrets SUPABASE_SERVICE_ROLE_KEY=darbha-service-role-key:latest` to the deploy,
+and in Supabase **Auth → URL Configuration → Redirect URLs** add
+`https://darbha.info/welcome`. For local testing, also set
+`INVITE_REDIRECT_URL=http://localhost:3400/welcome` in `apps/api/.env` (the API defaults
+the redirect to `https://<SITE_DOMAIN>/welcome`) and allow-list that localhost URL too.
 
 Note the deploy asymmetry: the web app auto-deploys on every push to `main` (Vercel),
 but the API is deployed manually with the two commands above.

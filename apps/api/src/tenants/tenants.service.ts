@@ -47,14 +47,15 @@ export class TenantsService {
     return tenant;
   }
 
-  async create(dto: CreateTenantDto) {
+  /** Pass `db` to run inside a caller's transaction (e.g. application approval). */
+  async create(dto: CreateTenantDto, db: Prisma.TransactionClient = this.prisma.client) {
     if (RESERVED_SLUGS.includes(dto.slug)) {
       throw new ConflictException(`Slug "${dto.slug}" is reserved`);
     }
-    const existing = await this.prisma.client.tenant.findUnique({ where: { slug: dto.slug } });
+    const existing = await db.tenant.findUnique({ where: { slug: dto.slug } });
     if (existing) throw new ConflictException(`Slug "${dto.slug}" is already taken`);
 
-    return this.prisma.client.tenant.create({
+    return db.tenant.create({
       data: {
         slug: dto.slug,
         displayName: dto.displayName,

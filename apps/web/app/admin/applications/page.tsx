@@ -28,12 +28,30 @@ export default function ApplicationsPage() {
     if (!token) return;
     setBusyId(app.id);
     try {
-      await adminApi.reviewApplication(token, app.id, status);
+      const result = await adminApi.reviewApplication(token, app.id, status);
       if (status === "approved") {
         toast.success(`Approved — ${app.requestedSlug}.darbha.info is live`, {
           label: "Open →",
           href: `https://${app.requestedSlug}.darbha.info`,
         });
+        const invite = result.invite;
+        if (invite?.sent) {
+          if (invite.reason) {
+            toast.error(`Invite email sent to ${app.email}, but ${invite.reason}.`);
+          } else {
+            toast.success(`Invite email sent to ${app.email} — they set their own password.`);
+          }
+        } else if (invite?.alreadyRegistered) {
+          if (invite.reason) {
+            toast.error(`Heads up: ${invite.reason}.`);
+          } else {
+            toast.success(`${app.email} already has a login — linked it to the new site.`);
+          }
+        } else if (invite) {
+          toast.error(
+            `Site created, but the invite email didn't go out: ${invite.reason ?? "unknown error"}. Onboard them manually.`,
+          );
+        }
       } else {
         toast.success(`Rejected ${app.firstName} ${app.lastName}'s application`);
       }
@@ -62,6 +80,11 @@ export default function ApplicationsPage() {
                   {app.firstName} {app.lastName}
                 </span>
                 <span className="text-sm text-[#7d7468]">{app.email}</span>
+                {app.phone ? (
+                  <a href={`tel:${app.phone}`} className="text-sm text-[#7d7468] hover:text-[#b0713b]">
+                    {app.phone}
+                  </a>
+                ) : null}
                 <span className="rounded-full bg-[#b0713b]/10 px-3 py-0.5 text-xs font-semibold text-[#b0713b]">
                   {GENRE_LABELS[app.genre]}
                 </span>

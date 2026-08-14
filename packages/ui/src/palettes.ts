@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import type { TenantTheme } from "@darbha/types";
+import { siteFont } from "./fonts";
 
 /** Liquid-glass surface tokens — a frosted material that floats over `ground`. */
 export interface Glass {
@@ -125,9 +126,14 @@ export function paletteFor(theme: TenantTheme | null | undefined): Palette {
 }
 
 export function fontFamilyFor(theme: TenantTheme | null | undefined): string {
-  return theme?.fontStyle === "sans"
-    ? "var(--font-sans, ui-sans-serif, system-ui, sans-serif)"
-    : "var(--font-serif, Georgia, 'Times New Roman', serif)";
+  const serif = "var(--font-serif, Georgia, 'Times New Roman', serif)";
+  const sans = "var(--font-sans, ui-sans-serif, system-ui, sans-serif)";
+  // A curated custom font wins; its category picks the fallback stack.
+  const custom = siteFont(theme?.font);
+  if (custom) {
+    return `'${custom.family}', ${custom.category === "sans" ? sans : serif}`;
+  }
+  return theme?.fontStyle === "sans" ? sans : serif;
 }
 
 /** Core frosted-glass surface styles for a palette. Spread onto an element and add radius/padding. */

@@ -88,6 +88,8 @@ model Application {
   lastName      String            @map("last_name")
   requestedSlug String            @map("requested_slug")
   email         String
+  /// Contact number for the community outreach call; "" on pre-phone rows.
+  phone         String            @default("")
   message       String?
   genre         WorkType          @default(other)
   status        ApplicationStatus @default(pending)

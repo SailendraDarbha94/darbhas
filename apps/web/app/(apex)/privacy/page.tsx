@@ -21,8 +21,10 @@ export default function PrivacyPage() {
       <ul>
         <li>
           <strong>Subdomain applications.</strong> When you apply for a subdomain we collect your
-          name, requested subdomain, email address, what you write, and an optional message. We
-          use this only to review the application and reply to you.
+          name, requested subdomain, email address, phone number, what you write, and an optional
+          message. We use this only to review the application: a member of the community calls
+          the number you share to verify and welcome you, and if you&apos;re approved your email
+          receives the invitation to set up your writer login.
         </li>
         <li>
           <strong>Writer accounts.</strong>{" "}Family members who manage a site sign in with an email
@@ -48,8 +50,8 @@ export default function PrivacyPage() {
       <h2>Where your data lives</h2>
       <p>
         Content and accounts are stored with Supabase (our database and authentication provider).
-        The website is served by Vercel and our API by Render. These providers process data on
-        our behalf to run the site, and nothing more.
+        The website is served by Vercel and our API by Google Cloud Run. These providers process
+        data on our behalf to run the site, and nothing more.
       </p>
 
       <h2>Your choices</h2>

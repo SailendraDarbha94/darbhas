@@ -4,7 +4,9 @@ import ReactMarkdown from "react-markdown";
 import type { TenantTheme } from "@darbha/types";
 import { GENRE_LABELS, fontFamilyFor, formatDate, glassStyle, paletteFor, type Palette } from "@darbha/ui";
 import { ApiError, getTenantBySlug } from "@/lib/api";
+import { jsonLdHtml } from "@/lib/json-ld";
 import { tenantUrl } from "@/lib/tenant-host";
+import { TenantFontLinks } from "@/components/tenant-font-links";
 
 interface Props {
   params: Promise<{ slug: string; id: string }>;
@@ -151,8 +153,9 @@ export default async function WorkPage(props: Props) {
     >
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }}
       />
+      <TenantFontLinks font={theme?.font} />
       <article style={{ maxWidth: 680, margin: "0 auto", padding: "4rem 1.5rem 5rem" }}>
         <a href="/" style={{ color: palette.accent, textDecoration: "none", fontSize: "0.9rem" }}>
           &larr; {tenant.displayName}

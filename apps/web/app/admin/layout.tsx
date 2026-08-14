@@ -43,6 +43,9 @@ function Chrome({ children }: { children: React.ReactNode }) {
           <Link href="/admin/site" className="text-sm hover:text-[#b0713b]">
             My Site
           </Link>
+          <Link href="/admin/settings" className="text-sm hover:text-[#b0713b]">
+            Settings
+          </Link>
           {isAdmin ? (
             <>
               <Link href="/admin/applications" className="text-sm hover:text-[#b0713b]">

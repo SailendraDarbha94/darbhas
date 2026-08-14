@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Tenant, TenantProfile, TenantTheme, TimelineEntry } from "@darbha/types";
 import { THEME_PRESETS } from "@darbha/types";
-import { PALETTES } from "@darbha/ui";
+import { PALETTES, SITE_FONTS, allFontsHref } from "@darbha/ui";
 import { adminApi } from "@/lib/api";
 import { uploadMedia } from "@/lib/supabase";
 import { useToast } from "../toast";
@@ -33,7 +33,18 @@ interface RowsState {
  * optional — anything left blank simply doesn't appear on the public site.
  * Mount with key={tenant.id} so switching sites resets the form.
  */
-export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string }) {
+export function SiteEditor({
+  tenant,
+  token,
+  onSaved,
+}: {
+  tenant: Tenant;
+  token: string;
+  /** Called with the server's updated tenant so the parent list stays fresh —
+   * otherwise switching sites in the admin picker remounts from stale data
+   * and the next save silently reverts this one. */
+  onSaved?: (tenant: Tenant) => void;
+}) {
   const toast = useToast();
   const theme = tenant.theme as TenantTheme;
   const profile = (tenant.profile ?? {}) as TenantProfile;
@@ -43,6 +54,7 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
   const [bio, setBio] = useState(tenant.bio ?? "");
   const [avatarUrl, setAvatarUrl] = useState(tenant.avatarUrl ?? "");
   const [preset, setPreset] = useState<TenantTheme["preset"]>(theme?.preset ?? "ivory");
+  const [fontFamily, setFontFamily] = useState(theme?.font ?? "");
 
   const [roles, setRoles] = useState((profile.roles ?? []).join(", "));
   const [bornDate, setBornDate] = useState(profile.born?.date ?? "");
@@ -112,14 +124,15 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
     };
 
     try {
-      await adminApi.updateTenant(token, tenant.id, {
+      const saved = await adminApi.updateTenant(token, tenant.id, {
         displayName: displayName.trim() || tenant.displayName,
         tagline: tagline.trim(),
         bio: bio.trim(),
         avatarUrl,
-        theme: { ...theme, preset },
+        theme: { ...theme, preset, font: fontFamily || undefined },
         profile: nextProfile,
       });
+      onSaved?.(saved);
       toast.success(`Saved ${displayName.trim() || tenant.displayName} — live within a minute.`, {
         label: "View site →",
         href: siteUrl(tenant.slug),
@@ -231,6 +244,48 @@ export function SiteEditor({ tenant, token }: { tenant: Tenant; token: string })
               </div>
               <p className="mt-1 text-xs text-[#7d7468]">Colors for your site and gallery card.</p>
             </div>
+          </div>
+
+          <div>
+            {/* Every curated face in one stylesheet, so each chip previews itself. */}
+            <link rel="stylesheet" href={allFontsHref()} precedence="default" />
+            <span className={labelCls}>Font</span>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Site font">
+              <button
+                type="button"
+                aria-pressed={fontFamily === ""}
+                onClick={() => setFontFamily("")}
+                className={`rounded-lg border px-3 py-1.5 text-sm transition ${
+                  fontFamily === ""
+                    ? "border-[#2b2620] bg-black/5 font-semibold"
+                    : "border-black/15 hover:bg-black/5"
+                }`}
+              >
+                Site default
+              </button>
+              {SITE_FONTS.map((f) => (
+                <button
+                  key={f.family}
+                  type="button"
+                  aria-pressed={fontFamily === f.family}
+                  title={`${f.label} (${f.category})`}
+                  onClick={() => setFontFamily(f.family)}
+                  className={`rounded-lg border px-3 py-1.5 text-sm transition ${
+                    fontFamily === f.family
+                      ? "border-[#2b2620] bg-black/5 font-semibold"
+                      : "border-black/15 hover:bg-black/5"
+                  }`}
+                  style={{
+                    fontFamily: `'${f.family}', ${f.category === "sans" ? "sans-serif" : "serif"}`,
+                  }}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-[#7d7468]">
+              For your site&apos;s English text — Telugu always renders in Noto Serif Telugu.
+            </p>
           </div>
         </div>
       </section>

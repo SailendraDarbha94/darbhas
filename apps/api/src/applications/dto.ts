@@ -18,6 +18,11 @@ export class CreateApplicationDto {
   @IsEmail()
   email: string;
 
+  @Matches(/^(?=(?:[^0-9]*[0-9]){7})\+?[0-9()\s-]{7,20}$/, {
+    message: "phone must be 7-20 digits (spaces, dashes and a leading + are fine)",
+  })
+  phone: string;
+
   @IsOptional()
   @IsString()
   @MaxLength(2000)

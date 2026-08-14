@@ -85,7 +85,14 @@ export default function MySitePage() {
         <p className="mt-8 text-[#7d7468]">Loading&hellip;</p>
       ) : selected ? (
         <div className="mt-8">
-          <SiteEditor key={selected.id} tenant={selected} token={token} />
+          <SiteEditor
+            key={selected.id}
+            tenant={selected}
+            token={token}
+            onSaved={(saved) =>
+              setTenants((prev) => prev?.map((t) => (t.id === saved.id ? saved : t)) ?? prev)
+            }
+          />
         </div>
       ) : (
         <p className="mt-8 text-[#7d7468]">No sites yet.</p>

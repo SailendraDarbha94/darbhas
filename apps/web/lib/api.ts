@@ -66,7 +66,7 @@ export const adminApi = {
       cache: "no-store",
     }),
   reviewApplication: (token: string, id: string, status: "approved" | "rejected") =>
-    request<unknown>(`/applications/${id}`, {
+    request<ReviewResult>(`/applications/${id}`, {
       method: "PATCH",
       headers: authHeaders(token),
       body: JSON.stringify({ status }),
@@ -102,11 +102,19 @@ export const adminApi = {
     request<{ ok: boolean }>(`/works/${id}`, { method: "DELETE", headers: authHeaders(token) }),
 };
 
+/** PATCH /applications/:id — rejection returns just the application. */
+export interface ReviewResult {
+  application?: Application;
+  tenant?: Tenant;
+  invite?: { sent: boolean; alreadyRegistered?: boolean; reason?: string };
+}
+
 export function submitApplication(data: {
   firstName: string;
   lastName: string;
   requestedSlug: string;
   email: string;
+  phone: string;
   message?: string;
   genre: string;
 }) {
