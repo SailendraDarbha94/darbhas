@@ -158,9 +158,18 @@ Cloud Run domain mapping (`gcloud beta run domain-mappings create --service darb
 same Google account.
 
 For approval invite emails, also store the Supabase service-role key as a secret and
-mount it (plus allow the redirect): create secret `darbha-service-role-key`, add
-`--set-secrets SUPABASE_SERVICE_ROLE_KEY=darbha-service-role-key:latest` to the deploy,
-and in Supabase **Auth → URL Configuration → Redirect URLs** add
+mount it (plus allow the redirect):
+
+```bash
+# never echo the key: paste it, then ctrl-D
+gcloud secrets create darbha-service-role-key --data-file=-
+gcloud run services update darbha-api --region asia-southeast1 \
+  --update-secrets SUPABASE_SERVICE_ROLE_KEY=darbha-service-role-key:latest
+```
+
+Use `--update-secrets`, not a second `--set-secrets` flag — `--set-secrets` replaces the
+whole set, so repeating it would silently unmount `DATABASE_URL` and break the API.
+Then in Supabase **Auth → URL Configuration → Redirect URLs** add
 `https://darbha.info/welcome`. For local testing, also set
 `INVITE_REDIRECT_URL=http://localhost:3400/welcome` in `apps/api/.env` (the API defaults
 the redirect to `https://<SITE_DOMAIN>/welcome`) and allow-list that localhost URL too.
