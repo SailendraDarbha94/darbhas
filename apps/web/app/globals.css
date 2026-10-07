@@ -290,3 +290,47 @@ a.glass-btn {
 .work-body p + p {
   margin-top: 1.5rem;
 }
+
+/* Clap button: a "+N" bubble floats up on each tap, Medium-style. */
+@keyframes clap-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 4px) scale(0.85);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -8px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -28px) scale(1);
+  }
+}
+.clap-burst {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  pointer-events: none;
+  animation: clap-burst 900ms ease-out forwards;
+}
+.clap-btn {
+  transition:
+    transform 120ms ease,
+    box-shadow 200ms ease;
+}
+.clap-btn:active:not([aria-disabled="true"]) {
+  transform: scale(0.92);
+}
+.clap-btn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .clap-burst {
+    animation: none;
+    opacity: 0;
+  }
+  .clap-btn {
+    transition: none;
+  }
+}

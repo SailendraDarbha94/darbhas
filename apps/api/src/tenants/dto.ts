@@ -1,5 +1,6 @@
 import {
   IsBoolean,
+  IsEmail,
   IsIn,
   IsObject,
   IsOptional,
@@ -91,4 +92,9 @@ export class UpdateTenantDto {
   @IsOptional()
   @IsUUID()
   ownerUserId?: string;
+}
+
+export class InviteWriterDto {
+  @IsEmail()
+  email: string;
 }

@@ -7,6 +7,7 @@ import { ApiError, getTenantBySlug } from "@/lib/api";
 import { jsonLdHtml } from "@/lib/json-ld";
 import { tenantUrl } from "@/lib/tenant-host";
 import { TenantFontLinks } from "@/components/tenant-font-links";
+import { ClapButton } from "@/components/clap-button";
 
 interface Props {
   params: Promise<{ slug: string; id: string }>;
@@ -198,6 +199,8 @@ export default async function WorkPage(props: Props) {
         >
           <ReactMarkdown>{work.body}</ReactMarkdown>
         </div>
+
+        <ClapButton workId={work.id} palette={palette} />
 
         <nav
           aria-label={`More ${GENRE_LABELS[work.type].toLowerCase()} by ${tenant.displayName}`}

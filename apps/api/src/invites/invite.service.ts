@@ -1,21 +1,11 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import type { InviteResult } from "@darbha/types";
 import { PrismaService } from "../prisma/prisma.service";
 
-export interface InviteResult {
-  /** True when Supabase accepted the invite email. */
-  sent: boolean;
-  /** True when the email already had a login. */
-  alreadyRegistered?: boolean;
-  /**
-   * Present whenever anything needs the admin's attention — an unsent invite,
-   * or a sent invite / existing account whose profile could not be linked.
-   */
-  reason?: string;
-}
-
 /**
- * Sends the "set up your writer login" invite when an application is approved,
+ * Sends the "set up your writer login" invite — on application approval, or
+ * from the admin Sites page for sites that predate applications —
  * via Supabase Auth's admin invite endpoint (service-role key). Best-effort by
  * design: approval must create the site even when the invite cannot be sent —
  * the admin sees the outcome and can onboard manually.
@@ -42,6 +32,16 @@ export class InviteService {
     const normalized = email.trim().toLowerCase();
 
     try {
+      // Check ownership before Supabase: an existing account — confirmed, or
+      // still pending its first invite — that already writes for another site
+      // (or is an admin) must never be silently repointed. Pending accounts
+      // matter most: Supabase happily re-invites them and returns 200.
+      const existingId = await this.findUserId(normalized);
+      if (existingId) {
+        const conflict = await this.ownershipConflict(existingId, tenantId, normalized);
+        if (conflict) return conflict;
+      }
+
       const res = await fetch(
         `${url}/auth/v1/invite?redirect_to=${encodeURIComponent(redirectTo)}`,
         {
@@ -81,30 +81,15 @@ export class InviteService {
       };
       const message = body.msg ?? body.message ?? `Supabase responded ${res.status}`;
 
-      // Existing account: only auto-link when that login isn't attached to
-      // anything yet. The applicant's email is unverified public input, so an
-      // account that already owns a site (or is an admin) must never be
-      // silently repointed — that's the admin's explicit call.
+      // Existing confirmed account: no email needed, just link it — after
+      // re-checking ownership, in case it changed since the check above.
       if (body.error_code === "email_exists" || /already been registered/i.test(message)) {
-        const rows = await this.prisma.client.$queryRaw<
-          { id: string }[]
-        >`select id from auth.users where lower(email) = ${normalized} limit 1`;
-        if (rows[0]) {
-          const profile = await this.prisma.client.profile.findUnique({
-            where: { id: rows[0].id },
-          });
-          if (
-            profile &&
-            (profile.role === "admin" || (profile.tenantId && profile.tenantId !== tenantId))
-          ) {
-            return {
-              sent: false,
-              alreadyRegistered: true,
-              reason: `${normalized} already belongs to an existing account — link it to the new site manually if that's really them`,
-            };
-          }
+        const userId = existingId ?? (await this.findUserId(normalized));
+        if (userId) {
+          const conflict = await this.ownershipConflict(userId, tenantId, normalized);
+          if (conflict) return conflict;
           try {
-            await this.linkProfile(rows[0].id, tenantId);
+            await this.linkProfile(userId, tenantId);
           } catch (e) {
             return {
               sent: false,
@@ -123,6 +108,34 @@ export class InviteService {
       this.logger.warn(`Invite for ${normalized} failed: ${message}`);
       return { sent: false, reason: message };
     }
+  }
+
+  private async findUserId(email: string): Promise<string | null> {
+    const rows = await this.prisma.client.$queryRaw<
+      { id: string }[]
+    >`select id from auth.users where lower(email) = ${email} limit 1`;
+    return rows[0]?.id ?? null;
+  }
+
+  /**
+   * Non-null when linking this account to the site would take it from
+   * somewhere else. Emails are unverified (public apply form) or typed by
+   * hand (Sites page), so moving a writer is always the admin's explicit call.
+   */
+  private async ownershipConflict(
+    userId: string,
+    tenantId: string,
+    email: string,
+  ): Promise<InviteResult | null> {
+    const profile = await this.prisma.client.profile.findUnique({ where: { id: userId } });
+    if (profile && (profile.role === "admin" || (profile.tenantId && profile.tenantId !== tenantId))) {
+      return {
+        sent: false,
+        alreadyRegistered: true,
+        reason: `${email} already belongs to an existing account — link it to this site manually if that's really them`,
+      };
+    }
+    return null;
   }
 
   /** The auth trigger may have created the profile already; either way, link it. */

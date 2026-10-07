@@ -116,11 +116,23 @@ or so of saving.
 - **Applications** (admin) — approve to create the tenant + live subdomain (and send the
   writer their invite email), or reject. Cards show the applicant's phone for the
   community outreach call.
-- **Sites** (admin) — theme presets and gallery visibility per tenant.
+- **Sites** (admin) — theme presets, gallery visibility, and **Invite writer**: emails a
+  set-your-password invite for an existing site (how seeded sites like Phanindra's get
+  their writer onboarded), with the same safeguards as approval invites.
 - **Settings** — change your password (current password required).
 - My Site also offers a curated Google-font picker for a site's Latin text
   (whitelisted families only; Telugu always renders in Noto Serif Telugu).
 - Every action confirms or fails via glass toasts (top right).
+
+## Claps
+
+Readers can applaud a work Medium-style, up to 50 claps each, with no login. A reader
+is a random ID their browser keeps in local storage; the per-reader cap is enforced in
+one atomic SQL statement. A looser per-IP backstop (250 per work) stops anyone from
+clearing storage to clap again, without locking out households or mobile carriers that
+share an address. IPs are stored only as an HMAC keyed by `IP_HASH_SALT` (falls back to
+`DATABASE_URL`, so no new secret is required). The `claps` table has RLS on with no
+policies, so only the API can reach it.
 
 ## SEO & discovery
 
@@ -199,6 +211,8 @@ but the API is deployed manually with the two commands above.
 | GET | `/tenants/all` | admin | Every tenant incl. hidden |
 | POST/PATCH/DELETE | `/tenants` | admin (writers may PATCH their own) | Manage sites |
 | GET/POST/PATCH/DELETE | `/works` | writer/admin | CRUD works (writers scoped to their tenant) |
+| POST | `/tenants/:id/invite` | admin | Email a writer their login invite for a site |
+| GET / POST | `/works/:id/claps` | public | Read / add claps (50 per reader) |
 | POST | `/applications` | public | Apply for a subdomain |
 | GET / PATCH | `/applications` | admin | Review; approving creates the tenant |
 | GET | `/health` | public | Liveness |

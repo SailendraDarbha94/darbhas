@@ -6,6 +6,7 @@ import { GENRE_LABELS } from "@darbha/ui";
 import { adminApi } from "@/lib/api";
 import { useSession } from "../session";
 import { useToast } from "../toast";
+import { toastInviteOutcome } from "../invite-toast";
 
 export default function ApplicationsPage() {
   const { token } = useSession();
@@ -34,23 +35,8 @@ export default function ApplicationsPage() {
           label: "Open →",
           href: `https://${app.requestedSlug}.darbha.info`,
         });
-        const invite = result.invite;
-        if (invite?.sent) {
-          if (invite.reason) {
-            toast.error(`Invite email sent to ${app.email}, but ${invite.reason}.`);
-          } else {
-            toast.success(`Invite email sent to ${app.email} — they set their own password.`);
-          }
-        } else if (invite?.alreadyRegistered) {
-          if (invite.reason) {
-            toast.error(`Heads up: ${invite.reason}.`);
-          } else {
-            toast.success(`${app.email} already has a login — linked it to the new site.`);
-          }
-        } else if (invite) {
-          toast.error(
-            `Site created, but the invite email didn't go out: ${invite.reason ?? "unknown error"}. Onboard them manually.`,
-          );
+        if (result.invite) {
+          toastInviteOutcome(toast, app.email, result.invite, { siteCreated: true });
         }
       } else {
         toast.success(`Rejected ${app.firstName} ${app.lastName}'s application`);

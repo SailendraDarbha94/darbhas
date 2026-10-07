@@ -1,10 +1,15 @@
 import "reflect-metadata";
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import type { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // Cloud Run's front end appends the caller's address to X-Forwarded-For.
+  // Trusting exactly that one hop makes req.ip the real client (claps use it
+  // for their per-IP backstop) without letting callers spoof it.
+  app.set("trust proxy", 1);
 
   const siteDomain = process.env.SITE_DOMAIN ?? "darbha.info";
   const extraOrigins = (process.env.CORS_ORIGINS ?? "")

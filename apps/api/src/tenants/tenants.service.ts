@@ -7,12 +7,16 @@ import {
 import { RESERVED_SLUGS } from "@darbha/types";
 import type { Prisma } from "@darbha/db";
 import { PrismaService } from "../prisma/prisma.service";
+import { InviteService } from "../invites/invite.service";
 import type { AuthUser } from "../auth/supabase-auth.guard";
 import type { CreateTenantDto, UpdateTenantDto } from "./dto";
 
 @Injectable()
 export class TenantsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly invites: InviteService,
+  ) {}
 
   listActive() {
     return this.prisma.client.tenant.findMany({
@@ -94,5 +98,15 @@ export class TenantsService {
   async remove(id: string) {
     await this.prisma.client.tenant.delete({ where: { id } });
     return { ok: true };
+  }
+
+  /**
+   * Admin: email a writer their login invite for an existing site — how sites
+   * that predate applications (or were seeded) get their writer onboarded.
+   */
+  async invite(id: string, email: string) {
+    const tenant = await this.prisma.client.tenant.findUnique({ where: { id } });
+    if (!tenant) throw new NotFoundException("Site not found");
+    return this.invites.inviteWriter(email, id);
   }
 }

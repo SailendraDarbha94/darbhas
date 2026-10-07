@@ -1,4 +1,12 @@
-import type { Application, ProfileRole, Tenant, TenantWithWorks, Work } from "@darbha/types";
+import type {
+  Application,
+  ClapState,
+  InviteResult,
+  ProfileRole,
+  Tenant,
+  TenantWithWorks,
+  Work,
+} from "@darbha/types";
 
 /** GET /tenants/me — the signed-in caller's role and own tenant (null for unlinked admins). */
 export interface Me {
@@ -71,6 +79,12 @@ export const adminApi = {
       headers: authHeaders(token),
       body: JSON.stringify({ status }),
     }),
+  inviteWriter: (token: string, tenantId: string, email: string) =>
+    request<InviteResult>(`/tenants/${tenantId}/invite`, {
+      method: "POST",
+      headers: authHeaders(token),
+      body: JSON.stringify({ email }),
+    }),
   listAllTenants: (token: string) =>
     request<Tenant[]>("/tenants/all", { headers: authHeaders(token), cache: "no-store" }),
   updateTenant: (token: string, id: string, data: Partial<Tenant>) =>
@@ -106,7 +120,7 @@ export const adminApi = {
 export interface ReviewResult {
   application?: Application;
   tenant?: Tenant;
-  invite?: { sent: boolean; alreadyRegistered?: boolean; reason?: string };
+  invite?: InviteResult;
 }
 
 export function submitApplication(data: {
@@ -121,5 +135,24 @@ export function submitApplication(data: {
   return request<Application>("/applications", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+/* ----- claps (public, called from the reader's browser) ----- */
+
+/** The reader id rides in a header so it never appears in request-URL logs. */
+export function getClaps(workId: string, visitorId?: string) {
+  return request<ClapState>(`/works/${workId}/claps`, {
+    cache: "no-store",
+    headers: visitorId ? { "X-Visitor-Id": visitorId } : {},
+  });
+}
+
+/** `keepalive` lets a final batch survive the reader navigating away. */
+export function sendClaps(workId: string, visitorId: string, count: number, keepalive = false) {
+  return request<ClapState>(`/works/${workId}/claps`, {
+    method: "POST",
+    body: JSON.stringify({ visitorId, count }),
+    keepalive,
   });
 }

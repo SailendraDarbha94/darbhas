@@ -10,6 +10,7 @@ alter table public.tenants enable row level security;
 alter table public.works enable row level security;
 alter table public.applications enable row level security;
 alter table public.profiles enable row level security;
+alter table public.claps enable row level security;    -- no policies: API-only
 
 -- 2. Public read access for published content (lets the anon key read the
 --    gallery/works if we ever want to query Supabase directly from clients).

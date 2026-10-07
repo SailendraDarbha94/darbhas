@@ -141,3 +141,32 @@ export const RESERVED_SLUGS = [
 ];
 
 export const SLUG_REGEX = /^[a-z][a-z0-9-]{1,30}$/;
+
+/** Medium-style per-reader cap on claps for one work. */
+export const MAX_CLAPS_PER_READER = 50;
+
+/** GET/POST /works/:id/claps — a work's applause, and this reader's share. */
+export interface ClapState {
+  total: number;
+  mine: number;
+  max: number;
+  /**
+   * True when this reader's network has no room left on this work (the per-IP
+   * backstop), so further claps would be dropped — the UI says so instead of
+   * letting taps silently vanish.
+   */
+  limited: boolean;
+}
+
+/** Outcome of sending a writer their login invite (approval or the Sites page). */
+export interface InviteResult {
+  /** True when Supabase accepted the invite email. */
+  sent: boolean;
+  /** True when the email already had a login. */
+  alreadyRegistered?: boolean;
+  /**
+   * Present whenever anything needs the admin's attention — an unsent invite,
+   * or a sent invite / existing account whose profile could not be linked.
+   */
+  reason?: string;
+}

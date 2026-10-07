@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { TenantsService } from "./tenants.service";
-import { CreateTenantDto, UpdateTenantDto } from "./dto";
+import { CreateTenantDto, InviteWriterDto, UpdateTenantDto } from "./dto";
 import { SupabaseAuthGuard, type AuthUser } from "../auth/supabase-auth.guard";
 import { AdminGuard } from "../auth/admin.guard";
 import { CurrentUser } from "../auth/current-user.decorator";
@@ -59,6 +59,13 @@ export class TenantsController {
     @CurrentUser() user: AuthUser,
   ) {
     return this.tenants.update(id, dto, user);
+  }
+
+  /** Admin: send a writer the set-your-password invite for this site. */
+  @UseGuards(SupabaseAuthGuard, AdminGuard)
+  @Post(":id/invite")
+  invite(@Param("id", ParseUUIDPipe) id: string, @Body() dto: InviteWriterDto) {
+    return this.tenants.invite(id, dto.email);
   }
 
   @UseGuards(SupabaseAuthGuard, AdminGuard)

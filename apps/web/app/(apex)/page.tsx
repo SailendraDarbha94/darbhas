@@ -102,10 +102,7 @@ export default async function ApexPage() {
 
       <section id="apply" className="mx-auto max-w-xl px-6 pb-24">
         <div className="glass-panel p-8 text-center sm:p-10">
-          <h2 className="font-[family-name:var(--font-serif)] text-3xl font-medium">
-            Are you a Darbha?
-          </h2>
-          <p className="mx-auto mt-3 max-w-md leading-relaxed text-[#7d7468]">
+          <p className="mx-auto max-w-md font-[family-name:var(--font-serif)] text-2xl leading-snug text-[#5a5048] sm:text-[1.75rem]">
             Get your
             own <span className="font-semibold text-[#2b2620]">yourname.{SITE_DOMAIN}</span>
             <br />

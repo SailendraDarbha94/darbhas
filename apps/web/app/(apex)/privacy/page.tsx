@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy policy" lastUpdated="July 2026">
+    <LegalPage title="Privacy policy" lastUpdated="October 2026">
       <p>
         darbha.info is a family-run website that publishes the writing of members of the Darbha
         family. We collect as little personal information as we can get away with, and this page
@@ -30,6 +30,11 @@ export default function PrivacyPage() {
           <strong>Writer accounts.</strong>{" "}Family members who manage a site sign in with an email
           address and password. Published works appear under the writer&apos;s name — that is the
           point of the site.
+        </li>
+        <li>
+          <strong>Claps.</strong> If you clap for a work, your browser keeps a random ID in local
+          storage (not linked to you or any account), and we store a one-way hash of your IP
+          address — never the address itself. Both exist only to cap claps at 50 per reader.
         </li>
         <li>
           <strong>Server logs.</strong> Our hosting providers keep standard technical logs

@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from "@nestjs/common
 import { RESERVED_SLUGS } from "@darbha/types";
 import { PrismaService } from "../prisma/prisma.service";
 import { TenantsService } from "../tenants/tenants.service";
-import { InviteService } from "./invite.service";
+import { InviteService } from "../invites/invite.service";
 import type { CreateApplicationDto, ReviewApplicationDto } from "./dto";
 
 @Injectable()

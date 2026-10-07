@@ -76,10 +76,32 @@ model Work {
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  claps  Clap[]
 
   @@index([tenantId, published, sortOrder])
   @@map("works")
+}
+
+/// Medium-style claps: one row per (work, reader), capped at 50 per reader.
+/// Readers are anonymous — no account, no cookie.
+model Clap {
+  id        String   @id @default(uuid()) @db.Uuid
+  workId    String   @map("work_id") @db.Uuid
+  /// Random id the reader's browser keeps in localStorage; tied to nothing else.
+  visitorId String   @map("visitor_id") @db.Uuid
+  /// HMAC of the reader's IP with a server secret — a backstop against
+  /// clearing storage to clap again; the raw address is never stored.
+  ipHash    String   @map("ip_hash")
+  count     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  work Work @relation(fields: [workId], references: [id], onDelete: Cascade)
+
+  @@unique([workId, visitorId])
+  @@index([workId, ipHash])
+  @@map("claps")
 }
 
 model Application {

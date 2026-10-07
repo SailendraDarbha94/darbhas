@@ -7,6 +7,7 @@ import { GENRE_LABELS, PALETTES } from "@darbha/ui";
 import { adminApi } from "@/lib/api";
 import { useSession } from "../session";
 import { useToast } from "../toast";
+import { toastInviteOutcome } from "../invite-toast";
 
 const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN ?? "darbha.info";
 
@@ -15,6 +16,9 @@ export default function TenantsPage() {
   const toast = useToast();
   const [tenants, setTenants] = useState<Tenant[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [invitingId, setInvitingId] = useState<string | null>(null);
+  // Per site, so one slow invite can't disable or close another site's form.
+  const [inviteBusyId, setInviteBusyId] = useState<string | null>(null);
 
   const refresh = useCallback(() => {
     if (!token) return;
@@ -54,6 +58,26 @@ export default function TenantsPage() {
     }
   }
 
+  async function sendInvite(tenant: Tenant, event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!token) return;
+    const email = String(new FormData(event.currentTarget).get("email") || "").trim();
+    setInviteBusyId(tenant.id);
+    try {
+      const invite = await adminApi.inviteWriter(token, tenant.id, email);
+      toastInviteOutcome(toast, email, invite);
+      // Keep the form open when something needs a retry or a manual step, and
+      // only ever close this site's form (another may be open by now).
+      if ((invite.sent || invite.alreadyRegistered) && !invite.reason) {
+        setInvitingId((cur) => (cur === tenant.id ? null : cur));
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not send the invite — try again.");
+    } finally {
+      setInviteBusyId((cur) => (cur === tenant.id ? null : cur));
+    }
+  }
+
   if (error) return <p className="text-red-700">{error} (admin access required)</p>;
   if (!tenants) return <p className="text-[#7d7468]">Loading&hellip;</p>;
 
@@ -90,7 +114,7 @@ export default function TenantsPage() {
                   {tenant.status}
                 </button>
               </div>
-              <div className="mt-4 flex items-center gap-2">
+              <div className="mt-4 flex flex-wrap items-center gap-2">
                 <span className="text-sm text-[#7d7468]">Theme:</span>
                 {THEME_PRESETS.map((preset) => (
                   <button
@@ -105,7 +129,52 @@ export default function TenantsPage() {
                     }}
                   />
                 ))}
+                <button
+                  type="button"
+                  onClick={() => setInvitingId(invitingId === tenant.id ? null : tenant.id)}
+                  aria-expanded={invitingId === tenant.id}
+                  className="ml-auto rounded-lg border border-black/15 px-3 py-1.5 text-sm font-medium hover:bg-black/5"
+                >
+                  Invite writer
+                </button>
               </div>
+              {invitingId === tenant.id ? (
+                <form
+                  onSubmit={(e) => void sendInvite(tenant, e)}
+                  className="mt-4 flex flex-wrap items-center gap-2 border-t border-black/5 pt-4"
+                >
+                  <label htmlFor={`invite-${tenant.id}`} className="sr-only">
+                    Writer&apos;s email
+                  </label>
+                  <input
+                    id={`invite-${tenant.id}`}
+                    name="email"
+                    type="email"
+                    required
+                    autoFocus
+                    placeholder="writer@example.com"
+                    className="min-w-0 flex-1 rounded-lg border border-black/15 bg-white px-3 py-2 text-sm outline-none focus:border-[#b0713b]"
+                  />
+                  <button
+                    type="submit"
+                    disabled={inviteBusyId === tenant.id}
+                    className="rounded-lg bg-[#b0713b] px-4 py-2 text-sm font-semibold text-white hover:bg-[#9a6233] disabled:opacity-60"
+                  >
+                    {inviteBusyId === tenant.id ? "Sending…" : "Send invite"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInvitingId(null)}
+                    className="text-sm text-[#7d7468] hover:text-[#2b2620]"
+                  >
+                    Cancel
+                  </button>
+                  <p className="basis-full text-xs text-[#7d7468]">
+                    They get an email to set their own password, and the login is linked to{" "}
+                    {tenant.slug}.{SITE_DOMAIN}.
+                  </p>
+                </form>
+              ) : null}
             </div>
           );
         })}
